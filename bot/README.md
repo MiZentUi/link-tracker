@@ -13,3 +13,4 @@ TELEGRAM_TOKEN=...
 cd bot
 mvn spring-boot:run
 ```
+
