@@ -1,10 +1,13 @@
 package backend.academy.linktracker.bot.service;
 
+import backend.academy.linktracker.bot.dto.LinkUpdate;
 import backend.academy.linktracker.bot.handler.CommandHandler;
+
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.BotCommand;
 import com.pengrad.telegrambot.model.Update;
+import com.pengrad.telegrambot.model.request.ParseMode;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.request.SetMyCommands;
 import jakarta.annotation.PostConstruct;
@@ -52,9 +55,10 @@ public class BotService {
         if (message != null && message.text() != null) {
             var text = message.text();
             long chatId = message.chat().id();
+            log.info("Message chat id: {}", chatId);
 
             if (text.startsWith("/")) {
-                var handler = handlers.get(text);
+                var handler = handlers.get(text.split("\s+")[0]);
 
                 if (handler != null) {
                     return handler.handle(update);
@@ -78,5 +82,16 @@ public class BotService {
         if (!response.isOk()) {
             log.atError().addKeyValue("response", response).log("Set commands failed");
         }
+    }
+
+    public void sendLinkUpdate(LinkUpdate update) {
+        update.getTgChatIds().forEach(id -> {
+            var message = new SendMessage((long) id, String.format("""
+                    <b>Обновление по ссылке: %s</b>
+                    <b>Описание:</b>
+                    <blockquote>%s</blockquote>
+                    """, update.getUrl(), update.getDescription())).parseMode(ParseMode.HTML);
+            bot.execute(message);
+        });
     }
 }
