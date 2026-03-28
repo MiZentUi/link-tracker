@@ -1,9 +1,10 @@
 package backend.academy.linktracker.scrapper.model;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 import org.hibernate.validator.constraints.URL;
-import org.hibernate.validator.constraints.UniqueElements;
 import org.springframework.validation.annotation.Validated;
 
 import lombok.Builder;
@@ -17,11 +18,13 @@ import lombok.Setter;
 public class Link {
     private Long id;
 
-    @UniqueElements
     private List<Long> chatIds;
 
     @URL
     private String url;
 
-    private List<String> tags;
+    private Set<String> tags;
+
+    @Builder.Default
+    private LocalDateTime lastUpdate = LocalDateTime.MIN;
 }

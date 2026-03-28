@@ -10,7 +10,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class RemoveLinkResquest {
+public class RemoveLinkRequest {
 
     @URL
     @NotEmpty

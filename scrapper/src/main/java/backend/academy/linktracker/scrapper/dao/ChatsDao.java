@@ -19,7 +19,6 @@ public class ChatsDao implements ChatsRepository {
 
     @Override
     public void save(Long chatId) {
-        System.out.println(chatIds.size());
         chatIds.add(chatId);
     }
 
