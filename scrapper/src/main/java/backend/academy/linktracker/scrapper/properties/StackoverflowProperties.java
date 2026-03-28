@@ -17,6 +17,9 @@ import org.springframework.validation.annotation.Validated;
 public class StackoverflowProperties {
 
     @NotEmpty
+    private String baseUrl;
+
+    @NotEmpty
     private String key;
 
     @NotEmpty
