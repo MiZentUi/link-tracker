@@ -1,4 +1,4 @@
-package backend.academy.linktracker.bot.configuration;
+package backend.academy.linktracker.bot.config;
 
 import backend.academy.linktracker.bot.handler.CommandHandler;
 import java.util.List;
@@ -14,7 +14,7 @@ public class HandlerConfiguration {
     private List<CommandHandler> handlers;
 
     @Bean
-    public Map<String, CommandHandler> handlersByCommand() {
+    Map<String, CommandHandler> handlersByCommand() {
         return handlers.stream().collect(Collectors.toMap(CommandHandler::getCommand, h -> h));
     }
 }

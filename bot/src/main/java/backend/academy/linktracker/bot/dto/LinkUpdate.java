@@ -26,5 +26,5 @@ public class LinkUpdate {
     private String description;
 
     @NotEmpty(message = "One tgchat id minimum requered")
-    private List<Integer> tgChatIds;
+    private List<Long> tgChatIds;
 }
