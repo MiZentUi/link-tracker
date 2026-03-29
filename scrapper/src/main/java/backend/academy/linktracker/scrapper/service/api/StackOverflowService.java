@@ -26,10 +26,13 @@ public class StackOverflowService implements ApiService {
 
     @Override
     public LocalDateTime getLastUpdate(Link link) {
-        var idPattern = Pattern.compile("https*:\\/\\/stackoverflow\\.com\\/questions\\/(?<id>\\d+)\\/.+");
+        var idPattern = Pattern.compile("https*:\\/\\/(?<site>[A-Za-z0-9]+)\\.com\\/questions\\/(?<id>\\d+)\\/.+");
         var matcher = idPattern.matcher(link.getUrl());
         if (matcher.find()) {
-            var response = client.questions(Integer.parseInt(matcher.group("id")), "stackoverflow",
+            var questionId = Integer.parseInt(matcher.group("id"));
+            var site = matcher.group("site");
+            log.info("size: {} - question: {}", site, questionId);
+            var response = client.questions(questionId, site,
                     properties.getKey(), properties.getAccessToken());
             log.info("stackoverflow quota remaining: " + response.getQuotaRemaining());
             return LocalDateTime.ofInstant(

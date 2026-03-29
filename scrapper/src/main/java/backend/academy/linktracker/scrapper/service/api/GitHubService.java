@@ -8,7 +8,9 @@ import org.springframework.stereotype.Service;
 import backend.academy.linktracker.scrapper.client.GitHubClient;
 import backend.academy.linktracker.scrapper.model.Link;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @AllArgsConstructor
 public class GitHubService implements ApiService {
@@ -23,9 +25,11 @@ public class GitHubService implements ApiService {
     public LocalDateTime getLastUpdate(Link link) {
         try {
             var repoParts = new URI(link.getUrl()).getPath().replaceFirst("/", "").split("/+");
-            return client.repos(repoParts[0], repoParts[1]).getUpdatedAt();
+            var owner = repoParts[0];
+            var repo = repoParts[1];
+            return client.repos(owner, repo).getUpdatedAt();
         } catch (URISyntaxException e) {
-            new RuntimeException(e);
+            log.atError().addKeyValue("exception", e).log(e.getMessage());
         }
         return null;
     }
