@@ -1,7 +1,9 @@
 package backend.academy.linktracker.bot.service;
 
-import backend.academy.linktracker.bot.dto.LinkUpdate;
-import backend.academy.linktracker.bot.handler.CommandHandler;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Service;
 
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
@@ -10,21 +12,23 @@ import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.request.ParseMode;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.request.SetMyCommands;
+
+import backend.academy.linktracker.bot.dto.LinkUpdate;
+import backend.academy.linktracker.bot.handler.CommandHandler;
 import jakarta.annotation.PostConstruct;
-import java.util.Map;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class BotService {
     private final TelegramBot bot;
 
     @Qualifier("handlersByCommand")
     private final Map<String, CommandHandler> handlers;
+
+    private CommandHandler currentHandler;
 
     @PostConstruct
     public void init() {
@@ -42,6 +46,7 @@ public class BotService {
                         log.atError().addKeyValue("response", response).log("Update is failed");
                     }
                 } else {
+
                     log.error("Message is null");
                 }
             });
@@ -57,19 +62,26 @@ public class BotService {
             long chatId = message.chat().id();
             log.info("Message chat id: {}", chatId);
 
-            if (text.startsWith("/")) {
-                var handler = handlers.get(text.split("\s+")[0]);
-
-                if (handler != null) {
-                    return handler.handle(update);
+            if (currentHandler != null) {
+                if (currentHandler.isDone()) {
+                    currentHandler = null;
                 }
-                return new SendMessage(
-                        chatId, "Неизвестная команда. Воспользуйтесь /help, чтобы посмотреть список доступных команд.");
             }
-            return new SendMessage(
-                    chatId,
-                    "Действие \"" + text
-                            + "\" не предусмотрено. Воспользуйтесь /help, чтобы посмотреть список доступных команд.");
+
+            var handler = handlers.get(text.split("\s+")[0]);
+
+            if (handler != null) {
+                currentHandler = handler;
+            }
+
+            if (currentHandler != null) {
+                return currentHandler.handle(update);
+            } else {
+                return new SendMessage(chatId, text.startsWith("/")
+                        ? "Неизвестная команда. Воспользуйтесь /help, чтобы посмотреть список доступных команд."
+                        : "Действие \"" + text
+                                + "\" не предусмотрено. Воспользуйтесь /help, чтобы посмотреть список доступных команд.");
+            }
         }
         return null;
     }

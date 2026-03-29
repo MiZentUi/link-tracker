@@ -9,4 +9,6 @@ public interface CommandHandler {
     String getDescription();
 
     SendMessage handle(Update update);
+
+    boolean isDone();
 }

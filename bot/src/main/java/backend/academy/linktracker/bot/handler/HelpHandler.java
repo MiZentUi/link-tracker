@@ -5,6 +5,7 @@ import com.pengrad.telegrambot.request.SendMessage;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
+
 import org.springframework.stereotype.Component;
 
 @Component
@@ -28,5 +29,10 @@ public class HelpHandler implements CommandHandler {
                 .map(h -> h.getCommand() + " - " + h.getDescription() + "\n")
                 .collect(Collectors.joining());
         return new SendMessage((long) update.message().chat().id(), text);
+    }
+
+    @Override
+    public boolean isDone() {
+        return true;
     }
 }
