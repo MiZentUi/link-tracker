@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
 
 import com.pengrad.telegrambot.model.Update;
@@ -47,8 +46,11 @@ public class TrackHandler implements CommandHandler {
 
         if (text.startsWith("/cancel")) {
             state = State.UNKNOWN;
-            return new SendMessage(chatId, "Отмена...");
+            log.info("track calcelation");
+            return new SendMessage(chatId, "Отмена!");
         }
+
+        log.info("current state: {}", state);
 
         switch (state) {
             case UNKNOWN:
@@ -64,6 +66,8 @@ public class TrackHandler implements CommandHandler {
                 if (!text.equals(".")) {
                     tags.addAll(Arrays.asList(text.split(",+")));
                 }
+                log.atInfo().addKeyValue("tags", tags).log("tags: {}",
+                        tags.stream().reduce((a, b) -> a + " " + b + " ").orElse(null));
                 linkRequest.setTags(tags);
                 state = State.UNKNOWN;
                 try {
@@ -79,6 +83,7 @@ public class TrackHandler implements CommandHandler {
                             return new SendMessage(chatId, e.getMessage());
                     }
                 }
+                log.atInfo().addKeyValue("link", linkRequest).log("link added: {}", linkRequest.getLink());
                 return new SendMessage(chatId, "Ссылка добавлена");
         }
 

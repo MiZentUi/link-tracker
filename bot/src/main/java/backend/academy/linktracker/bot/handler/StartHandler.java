@@ -33,6 +33,7 @@ public class StartHandler implements CommandHandler {
         try {
             scrapperClient.createChat(chatId);
         } catch (ApiErrorException e) {
+            log.atInfo().addKeyValue("exception", e).log("Start api error: ", e.getMessage());
         }
         return new SendMessage(chatId, "Добро пожаловать! Используйте /help, чтобы посмотреть доступные команды.");
     }

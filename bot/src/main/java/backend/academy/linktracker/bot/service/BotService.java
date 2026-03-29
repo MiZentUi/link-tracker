@@ -74,6 +74,9 @@ public class BotService {
                 currentHandler = handler;
             }
 
+            log.atInfo().addKeyValue("current_handler", currentHandler).log("current handler: {}",
+                    currentHandler.getCommand());
+
             if (currentHandler != null) {
                 return currentHandler.handle(update);
             } else {
