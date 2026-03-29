@@ -3,7 +3,6 @@ package backend.academy.linktracker.bot.handler;
 import java.util.regex.Pattern;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
 
 import com.pengrad.telegrambot.model.Update;
@@ -12,7 +11,9 @@ import com.pengrad.telegrambot.request.SendMessage;
 import backend.academy.linktracker.bot.client.ScrapperClient;
 import backend.academy.linktracker.bot.exception.ApiErrorException;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Component
 @AllArgsConstructor
 public class ListHandler implements CommandHandler {
@@ -34,10 +35,14 @@ public class ListHandler implements CommandHandler {
             long chatId = update.message().chat().id();
             try {
                 var links = scrapperClient.getLinks(update.message().chat().id()).getLinks();
+                log.atInfo().addKeyValue("chat_id", chatId).addKeyValue("links", links).log("links size: {}",
+                        links.size());
                 var pattern = Pattern.compile("tag=(?<tag>[A-Za-z0-9]+)");
                 var matcher = pattern.matcher(update.message().text());
                 if (matcher.find()) {
-                    links = links.stream().filter(l -> l.getTags().contains(matcher.group("tag"))).toList();
+                    var tag = matcher.group("tag");
+                    log.info("tag={}", tag);
+                    links = links.stream().filter(l -> l.getTags().contains(tag)).toList();
                 }
                 if (links.isEmpty()) {
                     return new SendMessage(chatId, "Ссылки не найдены");

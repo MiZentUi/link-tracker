@@ -10,7 +10,9 @@ import backend.academy.linktracker.bot.client.ScrapperClient;
 import backend.academy.linktracker.bot.dto.RemoveLinkRequest;
 import backend.academy.linktracker.bot.exception.ApiErrorException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class UntrackHandler implements CommandHandler {
@@ -39,8 +41,11 @@ public class UntrackHandler implements CommandHandler {
 
         if (text.startsWith("/cancel")) {
             state = State.UNKNOWN;
-            return new SendMessage(chatId, "Отмена...");
+            log.info("untrack calcelation");
+            return new SendMessage(chatId, "Отмена");
         }
+
+        log.info("current state: {}", state);
 
         switch (state) {
             case UNKNOWN:
@@ -48,8 +53,9 @@ public class UntrackHandler implements CommandHandler {
                 return new SendMessage(chatId, "Введите ссылку для прекращения отслеживания");
             case GET_LINK:
                 state = State.UNKNOWN;
+                var linkRequest = new RemoveLinkRequest(text);
                 try {
-                    scrapperClient.deleteLink(chatId, new RemoveLinkRequest(text));
+                    scrapperClient.deleteLink(chatId, linkRequest);
                 } catch (ApiErrorException e) {
                     var status = e.getStatusCode();
                     switch (status) {
@@ -61,6 +67,7 @@ public class UntrackHandler implements CommandHandler {
                             return new SendMessage(chatId, e.getMessage());
                     }
                 }
+                log.atInfo().addKeyValue("link", linkRequest).log("link removed: {}", linkRequest.getLink());
                 return new SendMessage(chatId, "Ссылка теперь не отслеживается");
         }
 
