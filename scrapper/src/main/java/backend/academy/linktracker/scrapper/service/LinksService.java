@@ -22,7 +22,9 @@ import backend.academy.linktracker.scrapper.repository.LinksRepository;
 import backend.academy.linktracker.scrapper.service.api.ApiService;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @AllArgsConstructor
 @Validated
@@ -37,9 +39,10 @@ public class LinksService {
         if (!chatsRepository.exists(chatId)) {
             throw new ChatNotFoundException(String.format("Chat id=%d not exists in repository", chatId));
         }
-        var linkResponses = linksRepository.findAllByChatId(chatId).stream()
+        var links = linksRepository.findAllByChatId(chatId).stream()
                 .map(l -> new LinkResponse(l.getId(), l.getUrl(), new ArrayList<>(l.getTags()))).toList();
-        return new ListLinksResponse(linkResponses, linkResponses.size());
+        log.atInfo().addKeyValue("links", links).log("links size: {}", links.size());
+        return new ListLinksResponse(links, links.size());
     }
 
     public Link addLink(@NotNull String url, @NotNull List<String> tags, @NotNull Long chatId) {
@@ -47,6 +50,8 @@ public class LinksService {
             throw new ChatNotFoundException(String.format("Chat id=%d not exists in repository", chatId));
         }
         var link = linksRepository.findByUrl(url);
+        log.atInfo().addKeyValue("url", url).addKeyValue("tags", tags).addKeyValue("chatId", chatId)
+                .log("try add link: {}", url);
         if (link == null) {
             link = Link.builder().url(url).tags(new HashSet<>(tags)).chatIds(new ArrayList<>(List.of(chatId))).build();
             linksRepository.save(link);
@@ -65,6 +70,7 @@ public class LinksService {
             throw new ChatNotFoundException(String.format("Chat id=%d not exists in repository", chatId));
         }
         var link = linksRepository.findByUrl(url);
+        log.atInfo().addKeyValue("url", url).addKeyValue("chatId", chatId).log("try remove link: {}", url);
         if (link == null) {
             throw new LinkNotFoundException(String.format("Link with url=%s not exists in repository", url));
         } else {
@@ -81,7 +87,14 @@ public class LinksService {
         var links = linksRepository.findAll();
         for (var link : links) {
             var url = link.getUrl();
-            var apiService = apiServices.stream().filter(s -> url.contains(s.getBaseUrl())).findAny().orElseThrow();
+            var apiService = apiServices.stream().filter(s -> url.contains(s.getBaseUrl())).findAny().orElse(null);
+
+            if (apiService == null) {
+                log.atWarn().addKeyValue("link", link).log("api service not exists for {}", url);
+                continue;
+            }
+
+            log.atInfo().addKeyValue("link", link).log("check link: {}", url);
 
             var updatedAt = apiService.getLastUpdate(link);
 
