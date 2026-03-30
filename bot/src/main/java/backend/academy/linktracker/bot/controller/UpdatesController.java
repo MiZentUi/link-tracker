@@ -1,21 +1,18 @@
 package backend.academy.linktracker.bot.controller;
 
-import java.util.Arrays;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.RestController;
-
 import backend.academy.linktracker.bot.dto.ApiErrorResponse;
 import backend.academy.linktracker.bot.dto.LinkUpdate;
 import backend.academy.linktracker.bot.service.BotService;
 import jakarta.validation.Valid;
+import java.util.Arrays;
 import lombok.AllArgsConstructor;
-
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @AllArgsConstructor
@@ -36,7 +33,9 @@ public class UpdatesController {
                 .code(HttpStatus.BAD_REQUEST.toString())
                 .exceptionName(exception.getClass().getCanonicalName())
                 .exceptionMessage(exception.getMessage())
-                .stacktrace(Arrays.stream(exception.getStackTrace()).map(StackTraceElement::toString).toList())
+                .stacktrace(Arrays.stream(exception.getStackTrace())
+                        .map(StackTraceElement::toString)
+                        .toList())
                 .build();
     }
 }

@@ -1,14 +1,12 @@
 package backend.academy.linktracker.scrapper.dao;
 
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import org.springframework.stereotype.Component;
-
 import backend.academy.linktracker.scrapper.model.Link;
 import backend.academy.linktracker.scrapper.repository.LinksRepository;
 import jakarta.annotation.PostConstruct;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import org.springframework.stereotype.Component;
 
 @Component
 public class LinksDao implements LinksRepository {
@@ -35,12 +33,17 @@ public class LinksDao implements LinksRepository {
 
     @Override
     public List<Link> findAllByChatId(Long chatId) {
-        return links.values().stream().filter(l -> l.getChatIds().contains(chatId)).toList();
+        return links.values().stream()
+                .filter(l -> l.getChatIds().contains(chatId))
+                .toList();
     }
 
     @Override
     public Link findByUrl(String url) {
-        return links.values().stream().filter(l -> l.getUrl().equals(url)).findAny().orElse(null);
+        return links.values().stream()
+                .filter(l -> l.getUrl().equals(url))
+                .findAny()
+                .orElse(null);
     }
 
     @Override

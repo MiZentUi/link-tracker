@@ -1,17 +1,15 @@
 package backend.academy.linktracker.scrapper.service.api;
 
+import backend.academy.linktracker.scrapper.client.StackOverflowClient;
+import backend.academy.linktracker.scrapper.model.Link;
+import backend.academy.linktracker.scrapper.properties.StackoverflowProperties;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
-
-import org.springframework.stereotype.Service;
-
-import backend.academy.linktracker.scrapper.client.StackOverflowClient;
-import backend.academy.linktracker.scrapper.model.Link;
-import backend.academy.linktracker.scrapper.properties.StackoverflowProperties;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
@@ -32,9 +30,8 @@ public class StackOverflowService implements ApiService {
             var questionId = Integer.parseInt(matcher.group("id"));
             var site = matcher.group("site");
             log.info("size: {} - question: {}", site, questionId);
-            var response = client.questions(questionId, site,
-                    properties.getKey(), properties.getAccessToken());
-            log.info("stackoverflow quota remaining: " + response.getQuotaRemaining());
+            var response = client.questions(questionId, site, properties.getKey(), properties.getAccessToken());
+            log.info("stackoverflow quota remaining: {}", response.getQuotaRemaining());
             return LocalDateTime.ofInstant(
                     Instant.ofEpochMilli(response.getLastActivityDate()),
                     TimeZone.getDefault().toZoneId());

@@ -5,7 +5,6 @@ import com.pengrad.telegrambot.request.SendMessage;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
-
 import org.springframework.stereotype.Component;
 
 @Component
