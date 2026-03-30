@@ -5,16 +5,16 @@ import backend.academy.linktracker.bot.exception.ApiErrorException;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.SendMessage;
 import java.util.regex.Pattern;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class ListHandler implements CommandHandler {
-    private ScrapperClient scrapperClient;
+    private final ScrapperClient scrapperClient;
 
     @Override
     public String getCommand() {
@@ -41,7 +41,7 @@ public class ListHandler implements CommandHandler {
                 var matcher = pattern.matcher(update.message().text());
                 if (matcher.find()) {
                     var tag = matcher.group("tag");
-                    log.info("tag={}", tag);
+                    log.atInfo().addKeyValue("tag", tag).log("tag={}", tag);
                     links = links.stream()
                             .filter(l -> l.getTags().contains(tag))
                             .toList();

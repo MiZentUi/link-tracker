@@ -5,7 +5,7 @@ import backend.academy.linktracker.bot.dto.LinkUpdate;
 import backend.academy.linktracker.bot.service.BotService;
 import jakarta.validation.Valid;
 import java.util.Arrays;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -15,9 +15,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class UpdatesController {
-    private BotService botService;
+    private final BotService botService;
 
     @PostMapping("/updates")
     @ResponseStatus(HttpStatus.OK)
@@ -27,7 +27,7 @@ public class UpdatesController {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ApiErrorResponse wrongRequestArguments(MethodArgumentNotValidException exception) {
+    public ApiErrorResponse badRequestArguments(MethodArgumentNotValidException exception) {
         return ApiErrorResponse.builder()
                 .description("Wrong request arguments")
                 .code(HttpStatus.BAD_REQUEST.toString())

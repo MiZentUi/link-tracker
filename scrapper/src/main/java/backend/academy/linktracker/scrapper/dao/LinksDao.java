@@ -2,26 +2,25 @@ package backend.academy.linktracker.scrapper.dao;
 
 import backend.academy.linktracker.scrapper.model.Link;
 import backend.academy.linktracker.scrapper.repository.LinksRepository;
-import jakarta.annotation.PostConstruct;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 import org.springframework.stereotype.Component;
 
 @Component
 public class LinksDao implements LinksRepository {
-    private Long idCounter;
-    private Map<Long, Link> links;
+    private final AtomicLong idCounter;
+    private final Map<Long, Link> links;
 
-    @PostConstruct
-    public void init() {
+    public LinksDao() {
         links = new ConcurrentHashMap<>();
-        idCounter = 1L;
+        idCounter = new AtomicLong(1);
     }
 
     @Override
     public void save(Link link) {
-        var currentId = idCounter++;
+        var currentId = idCounter.getAndIncrement();
         link.setId(currentId);
         links.put(currentId, link);
     }

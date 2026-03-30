@@ -1,18 +1,16 @@
 package backend.academy.linktracker.scrapper.dao;
 
 import backend.academy.linktracker.scrapper.repository.ChatsRepository;
-import jakarta.annotation.PostConstruct;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ChatsDao implements ChatsRepository {
-    private List<Long> chatIds;
+    private final List<Long> chatIds;
 
-    @PostConstruct
-    private void init() {
-        chatIds = new ArrayList<>();
+    public ChatsDao() {
+        chatIds = new CopyOnWriteArrayList<>();
     }
 
     @Override

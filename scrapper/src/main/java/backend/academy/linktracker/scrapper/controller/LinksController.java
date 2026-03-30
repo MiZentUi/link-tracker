@@ -8,7 +8,7 @@ import backend.academy.linktracker.scrapper.service.LinksService;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import java.util.ArrayList;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,9 +19,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/links")
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class LinksController {
-    private LinksService linksService;
+    private final LinksService linksService;
 
     @GetMapping
     public ListLinksResponse getLinks(@NotNull @PositiveOrZero @RequestHeader("Tg-Chat-Id") Long chatId) {
