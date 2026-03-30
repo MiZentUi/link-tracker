@@ -27,11 +27,11 @@ public class StartHandler implements CommandHandler {
     @Override
     public SendMessage handle(Update update) {
         long chatId = update.message().chat().id();
-        log.info("Start command from {}", chatId);
+        log.atInfo().addKeyValue("chat_id", chatId).log("start command");
         try {
             scrapperClient.createChat(chatId);
         } catch (ApiErrorException e) {
-            log.atInfo().addKeyValue("exception", e).log("Start api error: ", e.getMessage());
+            log.atInfo().addKeyValue("exception", e.getMessage()).log("start api error");
         }
         return new SendMessage(chatId, "Добро пожаловать! Используйте /help, чтобы посмотреть доступные команды.");
     }

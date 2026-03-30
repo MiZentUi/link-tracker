@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class UntrackHandler implements CommandHandler {
-    enum State {
+    private enum State {
         UNKNOWN,
         GET_LINK
     }
@@ -43,30 +43,30 @@ public class UntrackHandler implements CommandHandler {
             return new SendMessage(chatId, "Отмена");
         }
 
-        log.info("current state: {}", state);
+        log.atInfo().addKeyValue("state", state).log("current state");
 
         switch (state) {
-            case UNKNOWN:
+            case UNKNOWN -> {
                 state = State.GET_LINK;
                 return new SendMessage(chatId, "Введите ссылку для прекращения отслеживания");
-            case GET_LINK:
+            }
+            case GET_LINK -> {
                 state = State.UNKNOWN;
                 var linkRequest = new RemoveLinkRequest(text);
                 try {
                     scrapperClient.deleteLink(chatId, linkRequest);
                 } catch (ApiErrorException e) {
                     var status = e.getStatusCode();
-                    switch (status) {
-                        case HttpStatus.CONFLICT:
-                            return new SendMessage(chatId, "Ссылка уже отслеживается");
-                        case HttpStatus.NOT_FOUND:
-                            return new SendMessage(chatId, "Чат не зарегестрирован. Введите /start для регистрации");
-                        default:
-                            return new SendMessage(chatId, e.getMessage());
-                    }
+                    return switch (status) {
+                        case HttpStatus.CONFLICT -> new SendMessage(chatId, "Ссылка уже отслеживается");
+                        case HttpStatus.NOT_FOUND ->
+                            new SendMessage(chatId, "Чат не зарегестрирован. Введите /start для регистрации");
+                        default -> new SendMessage(chatId, e.getMessage());
+                    };
                 }
-                log.atInfo().addKeyValue("link", linkRequest).log("link removed: {}", linkRequest.getLink());
+                log.atInfo().addKeyValue("link", linkRequest.getLink()).log("link removed");
                 return new SendMessage(chatId, "Ссылка теперь не отслеживается");
+            }
         }
 
         return null;

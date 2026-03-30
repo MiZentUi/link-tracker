@@ -29,7 +29,7 @@ public class BotService {
 
     @PostConstruct
     public void init() {
-        log.atInfo().addKeyValue("handlers", handlers).log("Available handlers");
+        log.atInfo().addKeyValue("handlers", handlers).log("available handlers");
 
         setCommands();
 
@@ -40,11 +40,10 @@ public class BotService {
                     var response = bot.execute(message);
 
                     if (!response.isOk()) {
-                        log.atError().addKeyValue("response", response).log("Update is failed");
+                        log.atError().addKeyValue("response", message.getText()).log("update is failed");
                     }
                 } else {
-
-                    log.error("Message is null");
+                    log.error("message is null");
                 }
             });
             return UpdatesListener.CONFIRMED_UPDATES_ALL;
@@ -57,7 +56,7 @@ public class BotService {
         if (message != null && message.text() != null) {
             var text = message.text();
             long chatId = message.chat().id();
-            log.info("Message chat id: {}", chatId);
+            log.atInfo().addKeyValue("chat_id", chatId).log("message chat id");
 
             if (currentHandler != null && currentHandler.isDone()) {
                 currentHandler = null;
@@ -71,8 +70,8 @@ public class BotService {
 
             if (currentHandler != null) {
                 log.atInfo()
-                        .addKeyValue("current_handler", currentHandler)
-                        .log("current handler: {}", currentHandler.getCommand());
+                        .addKeyValue("current_handler", currentHandler.getCommand())
+                        .log();
 
                 return currentHandler.handle(update);
             } else {
@@ -93,7 +92,7 @@ public class BotService {
                 .toArray(BotCommand[]::new);
         var response = bot.execute(new SetMyCommands(botCommands));
         if (!response.isOk()) {
-            log.atError().addKeyValue("response", response).log("Set commands failed");
+            log.atError().addKeyValue("response", response).log("set commands failed");
         }
     }
 

@@ -4,7 +4,7 @@ import backend.academy.linktracker.bot.client.ScrapperClient;
 import backend.academy.linktracker.bot.dto.ApiErrorResponse;
 import backend.academy.linktracker.bot.exception.ApiErrorException;
 import backend.academy.linktracker.bot.properties.ScrapperProperties;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,9 +16,9 @@ import tools.jackson.databind.ObjectMapper;
 
 @Slf4j
 @Configuration
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class ScrapperConfiguration {
-    private ScrapperProperties properties;
+    private final ScrapperProperties properties;
 
     @Bean
     ScrapperClient scrapperClient(RestClient.Builder restClientBuilder) {
@@ -26,11 +26,12 @@ public class ScrapperConfiguration {
                 .baseUrl(properties.getBaseUrl())
                 .defaultStatusHandler(HttpStatusCode::isError, (_, response) -> {
                     var apiResponse = new ObjectMapper().readValue(response.getBody(), ApiErrorResponse.class);
-                    log.info(
-                            "ApiErrorResponse: {} - {} - {}",
-                            apiResponse.getCode(),
-                            apiResponse.getDescription(),
-                            apiResponse.getExceptionMessage());
+                    log.atInfo()
+                            .addKeyValue("code", apiResponse.getCode())
+                            .addKeyValue("description", apiResponse.getDescription())
+                            .addKeyValue("code", apiResponse.getCode())
+                            .addKeyValue("exception_message", apiResponse.getExceptionMessage())
+                            .log("ApiErrorResponse");
                     throw new ApiErrorException(apiResponse, response.getStatusCode());
                 })
                 .build();

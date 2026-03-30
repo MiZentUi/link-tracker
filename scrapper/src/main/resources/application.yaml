@@ -17,3 +17,7 @@ app:
   github:
     base-url: https://api.github.com
     token: ${GITHUB_TOKEN} # Use env variable. DO NOT KEEP TOKEN HERE
+  updates:
+    fixed-delay:
+      in:
+        seconds: 10

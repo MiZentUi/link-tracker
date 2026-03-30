@@ -4,13 +4,13 @@ import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.SendMessage;
 import java.util.List;
 import java.util.stream.Collectors;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class HelpHandler implements CommandHandler {
-    private List<CommandHandler> handlers;
+    private final List<CommandHandler> handlers;
 
     @Override
     public String getCommand() {

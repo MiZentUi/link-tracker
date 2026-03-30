@@ -6,8 +6,8 @@ import org.springframework.http.HttpStatusCode;
 
 @Getter
 public class ApiErrorException extends RuntimeException {
-    private ApiErrorResponse response;
-    private HttpStatusCode statusCode;
+    private final ApiErrorResponse response;
+    private final HttpStatusCode statusCode;
 
     public ApiErrorException(ApiErrorResponse response, HttpStatusCode statusCode) {
         this.statusCode = statusCode;
