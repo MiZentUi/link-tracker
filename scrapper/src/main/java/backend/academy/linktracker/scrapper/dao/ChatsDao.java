@@ -1,12 +1,10 @@
 package backend.academy.linktracker.scrapper.dao;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.springframework.stereotype.Component;
-
 import backend.academy.linktracker.scrapper.repository.ChatsRepository;
 import jakarta.annotation.PostConstruct;
+import java.util.ArrayList;
+import java.util.List;
+import org.springframework.stereotype.Component;
 
 @Component
 public class ChatsDao implements ChatsRepository {

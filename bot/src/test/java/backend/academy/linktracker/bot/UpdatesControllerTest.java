@@ -5,6 +5,8 @@ import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import backend.academy.linktracker.bot.controller.UpdatesController;
+import backend.academy.linktracker.bot.service.BotService;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,9 +14,6 @@ import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-
-import backend.academy.linktracker.bot.controller.UpdatesController;
-import backend.academy.linktracker.bot.service.BotService;
 
 @WebMvcTest(UpdatesController.class)
 class UpdatesControllerTest {
@@ -36,9 +35,7 @@ class UpdatesControllerTest {
                 }
                 """;
 
-        mockMvc.perform(post("/updates")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(body))
+        mockMvc.perform(post("/updates").contentType(MediaType.APPLICATION_JSON).content(body))
                 .andExpect(status().isOk());
 
         verify(botService, times(1)).sendLinkUpdate(ArgumentMatchers.any());
@@ -55,9 +52,7 @@ class UpdatesControllerTest {
                 }
                 """;
 
-        mockMvc.perform(post("/updates")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(body))
+        mockMvc.perform(post("/updates").contentType(MediaType.APPLICATION_JSON).content(body))
                 .andExpect(status().isBadRequest());
     }
 }

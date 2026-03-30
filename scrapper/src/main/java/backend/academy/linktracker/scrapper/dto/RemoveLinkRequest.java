@@ -1,11 +1,10 @@
 package backend.academy.linktracker.scrapper.dto;
 
-import org.hibernate.validator.constraints.URL;
-
 import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.validator.constraints.URL;
 
 @Getter
 @Setter

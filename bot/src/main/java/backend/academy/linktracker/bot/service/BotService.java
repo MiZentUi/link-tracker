@@ -1,10 +1,7 @@
 package backend.academy.linktracker.bot.service;
 
-import java.util.Map;
-
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Service;
-
+import backend.academy.linktracker.bot.dto.LinkUpdate;
+import backend.academy.linktracker.bot.handler.CommandHandler;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.BotCommand;
@@ -12,12 +9,12 @@ import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.request.ParseMode;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.request.SetMyCommands;
-
-import backend.academy.linktracker.bot.dto.LinkUpdate;
-import backend.academy.linktracker.bot.handler.CommandHandler;
 import jakarta.annotation.PostConstruct;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
@@ -62,10 +59,8 @@ public class BotService {
             long chatId = message.chat().id();
             log.info("Message chat id: {}", chatId);
 
-            if (currentHandler != null) {
-                if (currentHandler.isDone()) {
-                    currentHandler = null;
-                }
+            if (currentHandler != null && currentHandler.isDone()) {
+                currentHandler = null;
             }
 
             var handler = handlers.get(text.split("\s+")[0]);
@@ -74,16 +69,19 @@ public class BotService {
                 currentHandler = handler;
             }
 
-            log.atInfo().addKeyValue("current_handler", currentHandler).log("current handler: {}",
-                    currentHandler.getCommand());
-
             if (currentHandler != null) {
+                log.atInfo()
+                        .addKeyValue("current_handler", currentHandler)
+                        .log("current handler: {}", currentHandler.getCommand());
+
                 return currentHandler.handle(update);
             } else {
-                return new SendMessage(chatId, text.startsWith("/")
-                        ? "Неизвестная команда. Воспользуйтесь /help, чтобы посмотреть список доступных команд."
-                        : "Действие \"" + text
-                                + "\" не предусмотрено. Воспользуйтесь /help, чтобы посмотреть список доступных команд.");
+                return new SendMessage(
+                        chatId,
+                        text.startsWith("/")
+                                ? "Неизвестная команда. Воспользуйтесь /help, чтобы посмотреть список доступных команд."
+                                : "Действие \"" + text
+                                        + "\" не предусмотрено. Воспользуйтесь /help, чтобы посмотреть список доступных команд.");
             }
         }
         return null;
@@ -101,11 +99,10 @@ public class BotService {
 
     public void sendLinkUpdate(LinkUpdate update) {
         update.getTgChatIds().forEach(id -> {
-            var message = new SendMessage((long) id, String.format("""
-                    <b>Обновление по ссылке: %s</b>
-                    <b>Описание:</b>
-                    <blockquote>%s</blockquote>
-                    """, update.getUrl(), update.getDescription())).parseMode(ParseMode.HTML);
+            var updateFormat = "<b>Обновление по ссылке: %s</b>%n<b>Описание:</b>%n<blockquote>%s</blockquote>";
+            var message = new SendMessage(
+                            (long) id, String.format(updateFormat, update.getUrl(), update.getDescription()))
+                    .parseMode(ParseMode.HTML);
             bot.execute(message);
         });
     }

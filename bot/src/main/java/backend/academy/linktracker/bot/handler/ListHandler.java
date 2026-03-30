@@ -1,17 +1,14 @@
 package backend.academy.linktracker.bot.handler;
 
-import java.util.regex.Pattern;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Component;
-
-import com.pengrad.telegrambot.model.Update;
-import com.pengrad.telegrambot.request.SendMessage;
-
 import backend.academy.linktracker.bot.client.ScrapperClient;
 import backend.academy.linktracker.bot.exception.ApiErrorException;
+import com.pengrad.telegrambot.model.Update;
+import com.pengrad.telegrambot.request.SendMessage;
+import java.util.regex.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
@@ -34,15 +31,20 @@ public class ListHandler implements CommandHandler {
         if (update != null && update.message() != null) {
             long chatId = update.message().chat().id();
             try {
-                var links = scrapperClient.getLinks(update.message().chat().id()).getLinks();
-                log.atInfo().addKeyValue("chat_id", chatId).addKeyValue("links", links).log("links size: {}",
-                        links.size());
+                var links =
+                        scrapperClient.getLinks(update.message().chat().id()).getLinks();
+                log.atInfo()
+                        .addKeyValue("chat_id", chatId)
+                        .addKeyValue("links", links)
+                        .log("links size: {}", links.size());
                 var pattern = Pattern.compile("tag=(?<tag>[A-Za-z0-9]+)");
                 var matcher = pattern.matcher(update.message().text());
                 if (matcher.find()) {
                     var tag = matcher.group("tag");
                     log.info("tag={}", tag);
-                    links = links.stream().filter(l -> l.getTags().contains(tag)).toList();
+                    links = links.stream()
+                            .filter(l -> l.getTags().contains(tag))
+                            .toList();
                 }
                 if (links.isEmpty()) {
                     return new SendMessage(chatId, "Ссылки не найдены");
@@ -52,7 +54,9 @@ public class ListHandler implements CommandHandler {
                     response.append(" - ").append(l.getUrl());
                     var tags = l.getTags();
                     if (!tags.isEmpty()) {
-                        response.append(" - теги: [").append(String.join(",", tags)).append("]");
+                        response.append(" - теги: [")
+                                .append(String.join(",", tags))
+                                .append("]");
                     }
                     response.append("\n");
                 });

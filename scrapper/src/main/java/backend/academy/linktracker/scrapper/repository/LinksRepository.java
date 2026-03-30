@@ -1,10 +1,8 @@
 package backend.academy.linktracker.scrapper.repository;
 
-import java.util.List;
-
-import org.springframework.stereotype.Repository;
-
 import backend.academy.linktracker.scrapper.model.Link;
+import java.util.List;
+import org.springframework.stereotype.Repository;
 
 @Repository
 public interface LinksRepository {

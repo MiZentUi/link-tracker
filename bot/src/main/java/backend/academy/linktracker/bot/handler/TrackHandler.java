@@ -1,19 +1,16 @@
 package backend.academy.linktracker.bot.handler;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Component;
-
-import com.pengrad.telegrambot.model.Update;
-import com.pengrad.telegrambot.request.SendMessage;
-
 import backend.academy.linktracker.bot.client.ScrapperClient;
 import backend.academy.linktracker.bot.dto.AddLinkRequest;
 import backend.academy.linktracker.bot.exception.ApiErrorException;
+import com.pengrad.telegrambot.model.Update;
+import com.pengrad.telegrambot.request.SendMessage;
+import java.util.ArrayList;
+import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
@@ -66,8 +63,13 @@ public class TrackHandler implements CommandHandler {
                 if (!text.equals(".")) {
                     tags.addAll(Arrays.asList(text.split(",+")));
                 }
-                log.atInfo().addKeyValue("tags", tags).log("tags: {}",
-                        tags.stream().reduce((a, b) -> a + " " + b + " ").orElse(null));
+                log.atInfo()
+                        .addKeyValue("tags", tags)
+                        .log(
+                                "tags: {}",
+                                tags.stream()
+                                        .reduce((a, b) -> a + " " + b + " ")
+                                        .orElse(null));
                 linkRequest.setTags(tags);
                 state = State.UNKNOWN;
                 try {

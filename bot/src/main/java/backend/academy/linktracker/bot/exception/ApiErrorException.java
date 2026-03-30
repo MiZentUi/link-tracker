@@ -1,9 +1,8 @@
 package backend.academy.linktracker.bot.exception;
 
-import org.springframework.http.HttpStatusCode;
-
 import backend.academy.linktracker.bot.dto.ApiErrorResponse;
 import lombok.Getter;
+import org.springframework.http.HttpStatusCode;
 
 @Getter
 public class ApiErrorException extends RuntimeException {

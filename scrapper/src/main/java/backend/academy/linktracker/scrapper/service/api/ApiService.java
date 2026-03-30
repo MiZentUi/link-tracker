@@ -1,8 +1,7 @@
 package backend.academy.linktracker.scrapper.service.api;
 
-import java.time.LocalDateTime;
-
 import backend.academy.linktracker.scrapper.model.Link;
+import java.time.LocalDateTime;
 
 public interface ApiService {
     String getBaseUrl();
