@@ -3,8 +3,10 @@ package backend.academy.linktracker.bot.handler;
 import backend.academy.linktracker.bot.client.ScrapperClient;
 import backend.academy.linktracker.bot.dto.AddLinkRequest;
 import backend.academy.linktracker.bot.exception.ApiErrorException;
+import backend.academy.linktracker.bot.model.Session;
+import backend.academy.linktracker.bot.state.SessionState;
+import backend.academy.linktracker.bot.state.StateFactory;
 import com.pengrad.telegrambot.model.Update;
-import com.pengrad.telegrambot.request.SendMessage;
 import java.util.ArrayList;
 import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
@@ -16,15 +18,8 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class TrackHandler implements CommandHandler {
-    private enum State {
-        UNKNOWN,
-        GET_LINK,
-        GET_TAGS
-    }
-
+    private final StateFactory stateFactory;
     private final ScrapperClient scrapperClient;
-    private State state = State.UNKNOWN;
-    private AddLinkRequest linkRequest;
 
     @Override
     public String getCommand() {
@@ -37,64 +32,44 @@ public class TrackHandler implements CommandHandler {
     }
 
     @Override
-    public SendMessage handle(Update update) {
-        long chatId = update.message().chat().id();
-        var text = update.message().text();
-
-        if (text.startsWith("/cancel")) {
-            state = State.UNKNOWN;
-            log.info("track calcelation");
-            return new SendMessage(chatId, "Отмена!");
-        }
-
-        log.atInfo().addKeyValue("state", state.toString()).log("current state");
-
-        switch (state) {
-            case UNKNOWN -> {
-                state = State.GET_LINK;
-                linkRequest = new AddLinkRequest();
-                return new SendMessage(chatId, "Введите ссылку для отслеживания");
-            }
-            case GET_LINK -> {
-                linkRequest.setLink(text);
-                state = State.GET_TAGS;
-                return new SendMessage(chatId, "Введите теги (необязательно, \".\" для пропуска): ");
-            }
-            case GET_TAGS -> {
-                var tags = new ArrayList<String>();
-                if (!text.equals(".")) {
-                    tags.addAll(Arrays.asList(text.split(",+")));
-                }
-                log.atInfo()
-                        .addKeyValue(
-                                "tags",
-                                tags.stream()
-                                        .reduce((a, b) -> a + " " + b + " ")
-                                        .orElse(null))
-                        .log();
-                linkRequest.setTags(tags);
-                state = State.UNKNOWN;
-                try {
-                    scrapperClient.createLink(chatId, linkRequest);
-                } catch (ApiErrorException e) {
-                    var status = e.getStatusCode();
-                    return switch (status) {
-                        case HttpStatus.CONFLICT -> new SendMessage(chatId, "Ссылка уже отслеживается");
-                        case HttpStatus.NOT_FOUND ->
-                            new SendMessage(chatId, "Чат не зарегестрирован. Введите /start для регистрации");
-                        default -> new SendMessage(chatId, e.getMessage());
-                    };
-                }
-                log.atInfo().addKeyValue("link", linkRequest.getLink()).log("link added");
-                return new SendMessage(chatId, "Ссылка добавлена");
-            }
-        }
-
-        return null;
+    public SessionState getState(Session session) {
+        return stateFactory.getTrackState(session);
     }
 
     @Override
-    public boolean isDone() {
-        return state == State.UNKNOWN;
+    public String handle(Update update) {
+        return "Введите ссылку для отслеживания";
+    }
+
+    public String handleLink(Update update, AddLinkRequest linkRequest) {
+        linkRequest.setLink(update.message().text());
+        return "Введите теги (необязательно, \".\" для пропуска): ";
+    }
+
+    public String handleTags(Update update, AddLinkRequest linkRequest) {
+        var chatId = update.message().chat().id();
+        var text = update.message().text();
+        var tags = new ArrayList<String>();
+        if (!text.equals(".")) {
+            tags.addAll(Arrays.asList(text.split(",+")));
+        }
+        log.atInfo()
+                .addKeyValue(
+                        "tags",
+                        tags.stream().reduce((a, b) -> a + " " + b + " ").orElse(null))
+                .log();
+        linkRequest.setTags(tags);
+        try {
+            scrapperClient.createLink(chatId, linkRequest);
+        } catch (ApiErrorException e) {
+            var status = e.getStatusCode();
+            return switch (status) {
+                case HttpStatus.CONFLICT -> "Ссылка уже отслеживается";
+                case HttpStatus.NOT_FOUND -> "Чат не зарегестрирован. Введите /start для регистрации";
+                default -> e.getMessage();
+            };
+        }
+        log.atInfo().addKeyValue("link", linkRequest.getLink()).log("link added");
+        return "Ссылка добавлена";
     }
 }

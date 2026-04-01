@@ -2,8 +2,10 @@ package backend.academy.linktracker.bot.handler;
 
 import backend.academy.linktracker.bot.client.ScrapperClient;
 import backend.academy.linktracker.bot.exception.ApiErrorException;
+import backend.academy.linktracker.bot.model.Session;
+import backend.academy.linktracker.bot.state.SessionState;
+import backend.academy.linktracker.bot.state.StateFactory;
 import com.pengrad.telegrambot.model.Update;
-import com.pengrad.telegrambot.request.SendMessage;
 import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class ListHandler implements CommandHandler {
+    private final StateFactory stateFactory;
     private final ScrapperClient scrapperClient;
 
     @Override
@@ -27,7 +30,12 @@ public class ListHandler implements CommandHandler {
     }
 
     @Override
-    public SendMessage handle(Update update) {
+    public SessionState getState(Session session) {
+        return stateFactory.getDefaultState(session);
+    }
+
+    @Override
+    public String handle(Update update) {
         if (update != null && update.message() != null) {
             long chatId = update.message().chat().id();
             try {
@@ -47,7 +55,7 @@ public class ListHandler implements CommandHandler {
                             .toList();
                 }
                 if (links.isEmpty()) {
-                    return new SendMessage(chatId, "Ссылки не найдены");
+                    return "Ссылки не найдены";
                 }
                 var response = new StringBuilder("Ссылки: \n");
                 links.forEach(l -> {
@@ -60,19 +68,14 @@ public class ListHandler implements CommandHandler {
                     }
                     response.append("\n");
                 });
-                return new SendMessage(chatId, response.toString());
+                return response.toString();
             } catch (ApiErrorException e) {
                 var status = e.getStatusCode();
                 if (status == HttpStatus.NOT_FOUND) {
-                    return new SendMessage(chatId, "Чат не зарегестрирован. Введите /start для регистрации");
+                    return "Чат не зарегестрирован. Введите /start для регистрации";
                 }
             }
         }
         return null;
-    }
-
-    @Override
-    public boolean isDone() {
-        return true;
     }
 }
