@@ -3,8 +3,10 @@ package backend.academy.linktracker.bot.handler;
 import backend.academy.linktracker.bot.client.ScrapperClient;
 import backend.academy.linktracker.bot.dto.RemoveLinkRequest;
 import backend.academy.linktracker.bot.exception.ApiErrorException;
+import backend.academy.linktracker.bot.model.Session;
+import backend.academy.linktracker.bot.state.SessionState;
+import backend.academy.linktracker.bot.state.StateFactory;
 import com.pengrad.telegrambot.model.Update;
-import com.pengrad.telegrambot.request.SendMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -14,13 +16,8 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class UntrackHandler implements CommandHandler {
-    private enum State {
-        UNKNOWN,
-        GET_LINK
-    }
-
+    private final StateFactory stateFactory;
     private final ScrapperClient scrapperClient;
-    private State state = State.UNKNOWN;
 
     @Override
     public String getCommand() {
@@ -33,47 +30,30 @@ public class UntrackHandler implements CommandHandler {
     }
 
     @Override
-    public SendMessage handle(Update update) {
-        long chatId = update.message().chat().id();
-        var text = update.message().text();
-
-        if (text.startsWith("/cancel")) {
-            state = State.UNKNOWN;
-            log.info("untrack calcelation");
-            return new SendMessage(chatId, "Отмена");
-        }
-
-        log.atInfo().addKeyValue("state", state).log("current state");
-
-        switch (state) {
-            case UNKNOWN -> {
-                state = State.GET_LINK;
-                return new SendMessage(chatId, "Введите ссылку для прекращения отслеживания");
-            }
-            case GET_LINK -> {
-                state = State.UNKNOWN;
-                var linkRequest = new RemoveLinkRequest(text);
-                try {
-                    scrapperClient.deleteLink(chatId, linkRequest);
-                } catch (ApiErrorException e) {
-                    var status = e.getStatusCode();
-                    return switch (status) {
-                        case HttpStatus.CONFLICT -> new SendMessage(chatId, "Ссылка уже отслеживается");
-                        case HttpStatus.NOT_FOUND ->
-                            new SendMessage(chatId, "Чат не зарегестрирован. Введите /start для регистрации");
-                        default -> new SendMessage(chatId, e.getMessage());
-                    };
-                }
-                log.atInfo().addKeyValue("link", linkRequest.getLink()).log("link removed");
-                return new SendMessage(chatId, "Ссылка теперь не отслеживается");
-            }
-        }
-
-        return null;
+    public SessionState getState(Session session) {
+        return stateFactory.getUntrackState(session);
     }
 
     @Override
-    public boolean isDone() {
-        return state == State.UNKNOWN;
+    public String handle(Update update) {
+        return "Введите ссылку для прекращения отслеживания";
+    }
+
+    public String handleLink(Update update) {
+        long chatId = update.message().chat().id();
+        var text = update.message().text();
+        var linkRequest = new RemoveLinkRequest(text);
+        try {
+            scrapperClient.deleteLink(chatId, linkRequest);
+        } catch (ApiErrorException e) {
+            var status = e.getStatusCode();
+            return switch (status) {
+                case HttpStatus.CONFLICT -> "Ссылка уже отслеживается";
+                case HttpStatus.NOT_FOUND -> "Чат не зарегестрирован. Введите /start для регистрации";
+                default -> e.getMessage();
+            };
+        }
+        log.atInfo().addKeyValue("link", linkRequest.getLink()).log("link removed");
+        return "Ссылка теперь не отслеживается";
     }
 }

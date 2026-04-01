@@ -1,14 +1,15 @@
 package backend.academy.linktracker.bot.handler;
 
+import backend.academy.linktracker.bot.model.Session;
+import backend.academy.linktracker.bot.state.SessionState;
 import com.pengrad.telegrambot.model.Update;
-import com.pengrad.telegrambot.request.SendMessage;
 
 public interface CommandHandler {
     String getCommand();
 
     String getDescription();
 
-    SendMessage handle(Update update);
+    SessionState getState(Session session);
 
-    boolean isDone();
+    String handle(Update update);
 }

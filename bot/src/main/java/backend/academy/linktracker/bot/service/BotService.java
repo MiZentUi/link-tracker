@@ -2,10 +2,12 @@ package backend.academy.linktracker.bot.service;
 
 import backend.academy.linktracker.bot.dto.LinkUpdate;
 import backend.academy.linktracker.bot.handler.CommandHandler;
+import backend.academy.linktracker.bot.model.Session;
+import backend.academy.linktracker.bot.repository.SessionRepository;
+import backend.academy.linktracker.bot.state.StateFactory;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.BotCommand;
-import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.request.ParseMode;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.request.SetMyCommands;
@@ -20,12 +22,12 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class BotService {
+    private final StateFactory stateFactory;
     private final TelegramBot bot;
+    private final SessionRepository sessionRepository;
 
     @Qualifier("handlersByCommand")
     private final Map<String, CommandHandler> handlers;
-
-    private CommandHandler currentHandler;
 
     @PostConstruct
     public void init() {
@@ -34,13 +36,22 @@ public class BotService {
         setCommands();
 
         bot.setUpdatesListener(updates -> {
-            updates.forEach(u -> {
-                var message = processUpdate(u);
+            updates.forEach(update -> {
+                long chatId = update.message().chat().id();
+                var session = sessionRepository.findByChatId(chatId).orElse(null);
+
+                if (session == null) {
+                    session = new Session(chatId, stateFactory);
+                    sessionRepository.save(session);
+                }
+
+                var message = session.handleUpdate(update);
+
                 if (message != null) {
-                    var response = bot.execute(message);
+                    var response = bot.execute(new SendMessage(chatId, message));
 
                     if (!response.isOk()) {
-                        log.atError().addKeyValue("response", message.getText()).log("update is failed");
+                        log.atError().addKeyValue("response", message).log("update is failed");
                     }
                 } else {
                     log.error("message is null");
@@ -48,42 +59,6 @@ public class BotService {
             });
             return UpdatesListener.CONFIRMED_UPDATES_ALL;
         });
-    }
-
-    public SendMessage processUpdate(Update update) {
-        var message = update.message();
-
-        if (message != null && message.text() != null) {
-            var text = message.text();
-            long chatId = message.chat().id();
-            log.atInfo().addKeyValue("chat_id", chatId).log("message chat id");
-
-            if (currentHandler != null && currentHandler.isDone()) {
-                currentHandler = null;
-            }
-
-            var handler = handlers.get(text.split("\s+")[0]);
-
-            if (handler != null) {
-                currentHandler = handler;
-            }
-
-            if (currentHandler != null) {
-                log.atInfo()
-                        .addKeyValue("current_handler", currentHandler.getCommand())
-                        .log();
-
-                return currentHandler.handle(update);
-            } else {
-                return new SendMessage(
-                        chatId,
-                        text.startsWith("/")
-                                ? "Неизвестная команда. Воспользуйтесь /help, чтобы посмотреть список доступных команд."
-                                : "Действие \"" + text
-                                        + "\" не предусмотрено. Воспользуйтесь /help, чтобы посмотреть список доступных команд.");
-            }
-        }
-        return null;
     }
 
     private void setCommands() {

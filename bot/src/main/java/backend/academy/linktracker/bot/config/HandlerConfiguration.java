@@ -11,10 +11,9 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @RequiredArgsConstructor
 public class HandlerConfiguration {
-    private final List<CommandHandler> handlers;
 
     @Bean
-    Map<String, CommandHandler> handlersByCommand() {
+    Map<String, CommandHandler> handlersByCommand(List<CommandHandler> handlers) {
         return handlers.stream().collect(Collectors.toMap(CommandHandler::getCommand, h -> h));
     }
 }
