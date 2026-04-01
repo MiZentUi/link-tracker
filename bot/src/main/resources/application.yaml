@@ -4,6 +4,8 @@ server:
 spring:
   application:
     name: bot
+  config:
+    import: optional:file:.env[.properties]
 
 app:
   telegram:
@@ -11,3 +13,10 @@ app:
     token: ${TELEGRAM_TOKEN} # Use env variable. DO NOT KEEP TOKEN HERE
     update-listener-sleep: 1s
     debug: false
+  scrapper:
+    base-url: http://localhost:8081
+
+logging:
+  structured:
+    format:
+      console: ecs
