@@ -1,0 +1,44 @@
+Table chats {
+    id int [pk]
+}
+
+Table links {
+    id int [pk, increment]
+    url text [not null]
+
+    indexes {
+        url
+    }
+}
+
+Table tags {
+    id int [pk, increment]
+    name varchar [not null]
+
+    indexes {
+        name
+    }
+}
+
+Table links_chats {
+    link_id int [not null]
+    chat_id int [not null]
+
+    indexes {
+        (link_id, chat_id)
+    }
+}
+
+Table links_tags {
+    link_id int [not null]
+    tag_id int [not null]
+
+    indexes {
+        (link_id, tag_id)
+    }
+}
+
+Ref: links.id < links_chats.link_id
+Ref: chats.id < links_chats.chat_id
+Ref: links.id < links_tags.link_id
+Ref: tags.id < links_tags.tag_id
