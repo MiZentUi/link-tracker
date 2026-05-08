@@ -1,5 +1,5 @@
 services:
-  db-scrapper:
+  postgres:
     image: postgres:16-alpine
     env_file:
       .env
@@ -20,12 +20,12 @@ services:
       context: scrapper
       dockerfile: Dockerfile
     depends_on:
-      db-scrapper:
+      postgres:
         condition: service_healthy
     env_file:
       - .env
     environment:
-      - BOT_URL=http://bot:8080
+      BOT_URL: http://bot:8080
     healthcheck:
       test: "curl -f http://localhost:8081/actuator/health"
       interval: 10s
@@ -44,6 +44,27 @@ services:
         condition: service_healthy
     environment:
       SCRAPPER_URL: http://scrapper:8081
+
+  liquibase-migrations:
+    container_name: migrations
+    image: liquibase/liquibase:4.33
+    depends_on:
+      - postgres
+    env_file:
+      .env
+    environment:
+      POSTGRES_DB: scrapper
+    command:
+      - --searchPath=/changesets
+      - --changelog-file=master.yaml
+      - --driver=org.postgresql.Driver
+      - --url=jdbc:postgresql://postgres:5432/$POSTGRES_DB
+      - --username=$POSTGRES_USER
+      - --password=$POSTGRES_PASSWORD
+      - update
+    volumes:
+      - ./migrations:/changesets
+
 
 volumes:
   db-data:

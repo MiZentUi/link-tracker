@@ -1,10 +1,10 @@
 Table chats {
-    id int [pk]
+    id bigint [pk]
 }
 
 Table links {
     id int [pk, increment]
-    url text [not null]
+    url text [not null, unique]
 
     indexes {
         url
@@ -13,32 +13,25 @@ Table links {
 
 Table tags {
     id int [pk, increment]
+    chat_id bigint [not null]
+    link_id int [not null]
     name varchar [not null]
 
     indexes {
-        name
+        link_id
     }
 }
 
 Table links_chats {
     link_id int [not null]
-    chat_id int [not null]
+    chat_id bigint [not null]
 
     indexes {
         (link_id, chat_id)
     }
 }
 
-Table links_tags {
-    link_id int [not null]
-    tag_id int [not null]
-
-    indexes {
-        (link_id, tag_id)
-    }
-}
-
 Ref: links.id < links_chats.link_id
 Ref: chats.id < links_chats.chat_id
-Ref: links.id < links_tags.link_id
-Ref: tags.id < links_tags.tag_id
+Ref: tags.chat_id > chats.id
+Ref: tags.link_id > links.id
