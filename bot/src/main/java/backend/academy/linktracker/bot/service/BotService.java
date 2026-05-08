@@ -51,7 +51,9 @@ public class BotService {
                     var response = bot.execute(new SendMessage(chatId, message));
 
                     if (!response.isOk()) {
-                        log.atError().addKeyValue("response", message).log("update is failed");
+                        log.atError()
+                                .addKeyValue("response", message)
+                                .log("update is failed");
                     }
                 } else {
                     log.error("message is null");
@@ -75,7 +77,7 @@ public class BotService {
         update.getTgChatIds().forEach(id -> {
             var updateFormat = "<b>Обновление по ссылке: %s</b>%n<b>Описание:</b>%n<blockquote>%s</blockquote>";
             var message = new SendMessage(
-                            (long) id, String.format(updateFormat, update.getUrl(), update.getDescription()))
+                    (long) id, String.format(updateFormat, update.getUrl(), update.getDescription()))
                     .parseMode(ParseMode.HTML);
             bot.execute(message);
         });

@@ -9,7 +9,7 @@ spring:
 
 app:
   bot:
-    base-url: http://localhost:8080
+    base-url: ${BOT_URL:http://localhost:8080}
   stackoverflow:
     base-url: https://api.stackexchange.com/2.1
     key: ${STACKOVERFLOW_KEY} # Use env variable. DO NOT KEEP TOKEN HERE
