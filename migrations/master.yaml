@@ -1,4 +1,7 @@
 databaseChangeLog:
-  - includeAll:
-      path: changesets
+  - include:
+      file: changesets/tables.sql
+      relativeToChangelogFile: true
+  - include:
+      file: changesets/indexes.sql
       relativeToChangelogFile: true

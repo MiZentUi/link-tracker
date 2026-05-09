@@ -5,6 +5,7 @@ Table chats {
 Table links {
     id int [pk, increment]
     url text [not null, unique]
+    last_update timestamp [not null]
 
     indexes {
         url

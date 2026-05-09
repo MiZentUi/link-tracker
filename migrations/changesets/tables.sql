@@ -1,23 +1,24 @@
 --liquibase formatted sql
 
---chageset mizentui:tables
+--changeset mizentui:tables
 
 CREATE TABLE links
 (
     id INT PRIMARY KEY,
-    url TEXT NOT NULL UNIQUE
-)
+    url TEXT NOT NULL UNIQUE,
+    last_update TIMESTAMP NOT NULL
+);
 
 CREATE TABLE chats
 (
     id BIGINT PRIMARY KEY
-)
+);
 
 CREATE TABLE tags
 (
     id INT PRIMARY KEY,
     chat_id BIGINT NOT NULL,
-    link_id BIGINT NOT NULL,
+    link_id INT NOT NULL,
     name TEXT NOT NULL,
 
     FOREIGN KEY (chat_id) REFERENCES chats(id) ON DELETE CASCADE,

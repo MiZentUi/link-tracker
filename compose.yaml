@@ -6,10 +6,12 @@ services:
     environment:
       POSTGRES_DB: scrapper
     restart: unless-stopped
+    ports:
+      - 5432:5432
     volumes:
       - db-data:/var/lib/postgresql
     healthcheck:
-      test: "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"
+      test: "pg_isready -U $$POSTGRES_USER -d scrapper"
       interval: 10s
       timeout: 5s
       retries: 5
@@ -49,7 +51,8 @@ services:
     container_name: migrations
     image: liquibase/liquibase:4.33
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     env_file:
       .env
     environment:
@@ -58,9 +61,9 @@ services:
       - --searchPath=/changesets
       - --changelog-file=master.yaml
       - --driver=org.postgresql.Driver
-      - --url=jdbc:postgresql://postgres:5432/$POSTGRES_DB
-      - --username=$POSTGRES_USER
-      - --password=$POSTGRES_PASSWORD
+      - --url=jdbc:postgresql://postgres:5432/scrapper
+      - --username=${POSTGRES_USER}
+      - --password=${POSTGRES_PASSWORD}
       - update
     volumes:
       - ./migrations:/changesets

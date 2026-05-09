@@ -1,6 +1,6 @@
 --liquibase formatted sql
 
---chageset mizentui:indexes
+--changeset mizentui:indexes
 
 CREATE INDEX links_url_idx ON links (url);
 
