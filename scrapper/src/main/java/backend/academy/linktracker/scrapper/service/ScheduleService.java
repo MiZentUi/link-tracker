@@ -2,8 +2,11 @@ package backend.academy.linktracker.scrapper.service;
 
 import backend.academy.linktracker.scrapper.client.BotClient;
 import backend.academy.linktracker.scrapper.dto.LinkUpdate;
+import backend.academy.linktracker.scrapper.model.Chat;
 import backend.academy.linktracker.scrapper.repository.LinksRepository;
 import backend.academy.linktracker.scrapper.service.api.ScrapingApiService;
+import jakarta.transaction.Transactional;
+
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +23,7 @@ public class ScheduleService {
     private final BotClient botClient;
     private final List<ScrapingApiService> apiServices;
 
+    @Transactional
     @Scheduled(fixedDelayString = "${app.updates.fixed-delay.in.seconds}", timeUnit = TimeUnit.SECONDS)
     public void checkUpdates() {
         var links = linksRepository.findAll();
@@ -44,9 +48,10 @@ public class ScheduleService {
                         .id(link.getId())
                         .url(link.getUrl())
                         .description("Что-то изменилось!")
-                        .tgChatIds(link.getChatIds())
+                        .tgChatIds(link.getChats().stream().map(Chat::getId).toList())
                         .build());
                 link.setLastUpdate(updatedAt);
+                linksRepository.save(link);
             }
         }
     }

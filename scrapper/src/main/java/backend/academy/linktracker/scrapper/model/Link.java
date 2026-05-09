@@ -1,28 +1,55 @@
 package backend.academy.linktracker.scrapper.model;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Set;
+
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.validator.constraints.URL;
 import org.springframework.validation.annotation.Validated;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
+
+@Entity
+@Table(name = "links")
 @Getter
 @Setter
 @Builder
 @Validated
+@NoArgsConstructor
+@AllArgsConstructor
 public class Link {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private List<Long> chatIds;
-
     @URL
+    @NotNull
     private String url;
 
-    private Set<String> tags;
+    @ManyToMany
+    @JoinTable(name = "links_chats", joinColumns = @JoinColumn(name = "link_id"), inverseJoinColumns = @JoinColumn(name = "chat_id"))
+    private Set<Chat> chats;
+
+    @OneToMany(mappedBy = "link")
+    private Set<Tag> tags;
 
     @Builder.Default
-    private LocalDateTime lastUpdate = LocalDateTime.MIN;
+    @NotNull
+    @Column(name = "last_update")
+    private LocalDateTime lastUpdate = LocalDateTime.of(1970, 1, 1, 0, 0);
 }

@@ -29,7 +29,6 @@ public class ScrapperConfiguration {
                     log.atInfo()
                             .addKeyValue("code", apiResponse.getCode())
                             .addKeyValue("description", apiResponse.getDescription())
-                            .addKeyValue("code", apiResponse.getCode())
                             .addKeyValue("exception_message", apiResponse.getExceptionMessage())
                             .log("ApiErrorResponse");
                     throw new ApiErrorException(apiResponse, response.getStatusCode());

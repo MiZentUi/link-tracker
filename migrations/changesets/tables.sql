@@ -4,7 +4,7 @@
 
 CREATE TABLE links
 (
-    id INT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     url TEXT NOT NULL UNIQUE,
     last_update TIMESTAMP NOT NULL
 );
@@ -16,9 +16,9 @@ CREATE TABLE chats
 
 CREATE TABLE tags
 (
-    id INT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     chat_id BIGINT NOT NULL,
-    link_id INT NOT NULL,
+    link_id BIGINT NOT NULL,
     name TEXT NOT NULL,
 
     FOREIGN KEY (chat_id) REFERENCES chats(id) ON DELETE CASCADE,
@@ -27,7 +27,7 @@ CREATE TABLE tags
 
 CREATE TABLE links_chats
 (
-    link_id INT NOT NULL,
+    link_id BIGINT NOT NULL,
     chat_id BIGINT NOT NULL,
 
     PRIMARY KEY (link_id, chat_id),

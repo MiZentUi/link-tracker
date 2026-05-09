@@ -15,8 +15,3 @@ app:
     debug: false
   scrapper:
     base-url: ${SCRAPPER_URL:http://localhost:8081}
-
-logging:
-  structured:
-    format:
-      console: ecs
