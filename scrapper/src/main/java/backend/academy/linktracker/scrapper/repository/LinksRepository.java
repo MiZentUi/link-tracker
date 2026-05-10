@@ -17,4 +17,6 @@ public interface LinksRepository {
     Link findByUrl(String url);
 
     void delete(Link link);
+
+    void deleteAll();
 }

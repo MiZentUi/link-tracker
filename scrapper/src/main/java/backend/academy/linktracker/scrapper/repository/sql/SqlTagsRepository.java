@@ -1,10 +1,14 @@
 package backend.academy.linktracker.scrapper.repository.sql;
 
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import backend.academy.linktracker.scrapper.model.Tag;
 import backend.academy.linktracker.scrapper.repository.TagsRepository;
+import backend.academy.linktracker.scrapper.repository.sql.mapper.TagMapper;
 import lombok.RequiredArgsConstructor;
 
 @Component
@@ -21,6 +25,16 @@ public class SqlTagsRepository implements TagsRepository {
     }
 
     @Override
+    public List<Tag> findAll() {
+        return jdbcTemplate.query("SELECT * FROM tags", new TagMapper());
+    }
+
+    @Override
+    public Optional<Tag> findById(Long id) {
+        return jdbcTemplate.query("SELECT * FROM tags WHERE id = ?", new TagMapper(), id).stream().findAny();
+    }
+
+    @Override
     public void deleteById(Long id) {
         jdbcTemplate.update("DELETE FROM tags WHERE id = ?", id);
     }
@@ -28,5 +42,10 @@ public class SqlTagsRepository implements TagsRepository {
     @Override
     public void delete(Tag tag) {
         jdbcTemplate.update("DELETE FROM tags WHERE id = ?", tag.getId());
+    }
+
+    @Override
+    public void deleteAll() {
+        jdbcTemplate.update("DELETE FROM tags");
     }
 }

@@ -6,8 +6,6 @@ services:
     environment:
       POSTGRES_DB: scrapper
     restart: unless-stopped
-    ports:
-      - 5432:5432
     volumes:
       - db-data:/var/lib/postgresql
     healthcheck:

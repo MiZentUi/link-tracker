@@ -21,8 +21,10 @@ public class SqlChatsRepository implements ChatsRepository {
     @Override
     public Chat save(Chat chat) {
         jdbcTemplate.update("INSERT INTO chats VALUES (?)", chat.getId());
-        for (var link : chat.getLinks()) {
-            jdbcTemplate.update("INSERT INTO links_chats VALUES (?, ?)", link.getId(), chat.getId());
+        if (chat.getLinks() != null) {
+            for (var link : chat.getLinks()) {
+                jdbcTemplate.update("INSERT INTO links_chats VALUES (?, ?)", link.getId(), chat.getId());
+            }
         }
         return chat;
     }
@@ -42,6 +44,11 @@ public class SqlChatsRepository implements ChatsRepository {
     @Override
     public void deleteById(Long id) {
         jdbcTemplate.update("DELETE FROM chats WHERE id = ?", id);
+    }
+
+    @Override
+    public void deleteAll() {
+        jdbcTemplate.update("DELETE FROM chats");
     }
 
     @Override

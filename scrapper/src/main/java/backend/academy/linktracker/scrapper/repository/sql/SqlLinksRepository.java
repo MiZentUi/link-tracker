@@ -30,9 +30,11 @@ public class SqlLinksRepository implements LinksRepository {
                 Long.class,
                 link.getUrl(), link.getLastUpdate()));
         jdbcTemplate.update("DELETE FROM links_chats WHERE link_id = ?", link.getId());
-        for (var chat : link.getChats()) {
-            jdbcTemplate.update("INSERT INTO links_chats VALUES (?, ?) ON CONFLICT DO NOTHING", link.getId(),
-                    chat.getId());
+        if (link.getChats() != null) {
+            for (var chat : link.getChats()) {
+                jdbcTemplate.update("INSERT INTO links_chats VALUES (?, ?) ON CONFLICT DO NOTHING", link.getId(),
+                        chat.getId());
+            }
         }
         return link;
     }
@@ -87,5 +89,10 @@ public class SqlLinksRepository implements LinksRepository {
         return jdbcTemplate.query(
                 "SELECT tags.id, tags.name FROM links JOIN tags ON links.id = tags.link_id WHERE links.id = ?",
                 new TagMapper(), id).stream().collect(Collectors.toSet());
+    }
+
+    @Override
+    public void deleteAll() {
+        jdbcTemplate.update("DELETE FROM links");
     }
 }

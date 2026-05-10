@@ -6,21 +6,48 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
+import org.testcontainers.postgresql.PostgreSQLContainer;
+
+import backend.academy.linktracker.scrapper.repository.ChatsRepository;
+import backend.academy.linktracker.scrapper.repository.LinksRepository;
+import backend.academy.linktracker.scrapper.repository.TagsRepository;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@Import(TestcontainersConfiguration.class)
 class ControllersIntegrationTest {
 
     @Autowired
     MockMvc mockMvc;
+
+    @Autowired
+    PostgreSQLContainer postgres;
+
+    @Autowired
+    ChatsRepository chatsRepository;
+
+    @Autowired
+    LinksRepository linksRepository;
+
+    @Autowired
+    TagsRepository tagsRepository;
+
+    @AfterEach
+    void clean() {
+        chatsRepository.deleteAll();
+        linksRepository.deleteAll();
+        tagsRepository.deleteAll();
+    }
 
     @Test
     void addAndGetLink() throws Exception {
@@ -33,18 +60,18 @@ class ControllersIntegrationTest {
                 }
                 """;
         mockMvc.perform(post("/links")
-                        .header("Tg-Chat-Id", 1)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(addLinkBody))
+                .header("Tg-Chat-Id", 1)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(addLinkBody))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.id").exists())
                 .andExpect(jsonPath("$.url").value("https://example.com"))
                 .andExpect(jsonPath("$.tags[0]").value("test"));
 
         mockMvc.perform(get("/links").header("Tg-Chat-Id", 1))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.size").value(1))
-                .andExpect(jsonPath("$.links[0].id").value(1))
+                .andExpect(jsonPath("$.links[0].id").exists())
                 .andExpect(jsonPath("$.links[0].url").value("https://example.com"))
                 .andExpect(jsonPath("$.links[0].tags[0]").value("test"));
     }
@@ -60,9 +87,9 @@ class ControllersIntegrationTest {
                 }
                 """;
         mockMvc.perform(post("/links")
-                        .header("Tg-Chat-Id", 1)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(addLinkBody))
+                .header("Tg-Chat-Id", 1)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(addLinkBody))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.url").value("https://example.com"))
@@ -74,9 +101,9 @@ class ControllersIntegrationTest {
                 }
                 """;
         mockMvc.perform(delete("/links")
-                        .header("Tg-Chat-Id", 1)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(deleteLinkBody))
+                .header("Tg-Chat-Id", 1)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(deleteLinkBody))
                 .andExpect(status().isOk());
 
         mockMvc.perform(get("/links").header("Tg-Chat-Id", 1))
@@ -95,11 +122,11 @@ class ControllersIntegrationTest {
                 }
                 """;
         mockMvc.perform(post("/links")
-                        .header("Tg-Chat-Id", 1)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(addLinkBody))
+                .header("Tg-Chat-Id", 1)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(addLinkBody))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.id").exists())
                 .andExpect(jsonPath("$.url").value("https://example.com"))
                 .andExpect(jsonPath("$.tags[0]").value("test"));
 
@@ -108,7 +135,7 @@ class ControllersIntegrationTest {
         mockMvc.perform(get("/links").header("Tg-Chat-Id", 1))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.size").value(1))
-                .andExpect(jsonPath("$.links[0].id").value(1))
+                .andExpect(jsonPath("$.links[0].id").exists())
                 .andExpect(jsonPath("$.links[0].url").value("https://example.com"))
                 .andExpect(jsonPath("$.links[0].tags[0]").value("test"));
     }
@@ -124,9 +151,9 @@ class ControllersIntegrationTest {
                 }
                 """;
         mockMvc.perform(post("/links")
-                        .header("Tg-Chat-Id", 999)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(addLinkBody))
+                .header("Tg-Chat-Id", 999)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(addLinkBody))
                 .andExpect(status().isNotFound());
     }
 
@@ -143,9 +170,9 @@ class ControllersIntegrationTest {
                 }
                 """;
         mockMvc.perform(post("/links")
-                        .header("Tg-Chat-Id", 999)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(addLinkBody))
+                .header("Tg-Chat-Id", 999)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(addLinkBody))
                 .andExpect(status().isNotFound());
     }
 
