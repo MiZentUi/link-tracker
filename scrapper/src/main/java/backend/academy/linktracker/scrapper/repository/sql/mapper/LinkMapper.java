@@ -1,11 +1,9 @@
 package backend.academy.linktracker.scrapper.repository.sql.mapper;
 
+import backend.academy.linktracker.scrapper.model.Link;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
 import org.springframework.jdbc.core.RowMapper;
-
-import backend.academy.linktracker.scrapper.model.Link;
 
 public class LinkMapper implements RowMapper<Link> {
 

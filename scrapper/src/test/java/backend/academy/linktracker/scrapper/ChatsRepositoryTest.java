@@ -5,15 +5,14 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import backend.academy.linktracker.scrapper.model.Chat;
+import backend.academy.linktracker.scrapper.repository.ChatsRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.testcontainers.postgresql.PostgreSQLContainer;
-
-import backend.academy.linktracker.scrapper.model.Chat;
-import backend.academy.linktracker.scrapper.repository.ChatsRepository;
 
 @SpringBootTest
 @Import(TestcontainersConfiguration.class)
@@ -38,10 +37,10 @@ class ChatsRepositoryTest {
 
         assertNotNull(chat.getId());
 
-        var addedChat = chatsRepository.findById(chat.getId());
+        var addedChat = chatsRepository.findById(chat.getId()).orElse(null);
 
-        assertTrue(addedChat.isPresent());
-        assertEquals(chat.getId(), addedChat.get().getId());
+        assertNotNull(addedChat);
+        assertEquals(chat.getId(), addedChat.getId());
 
         chatsRepository.deleteById(chat.getId());
         var deletedChat = chatsRepository.findById(chat.getId());

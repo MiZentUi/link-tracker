@@ -1,9 +1,5 @@
 package backend.academy.linktracker.scrapper.config;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
-
 import backend.academy.linktracker.scrapper.properties.RepositoryProperties;
 import backend.academy.linktracker.scrapper.repository.ChatsRepository;
 import backend.academy.linktracker.scrapper.repository.LinksRepository;
@@ -15,6 +11,9 @@ import backend.academy.linktracker.scrapper.repository.sql.SqlChatsRepository;
 import backend.academy.linktracker.scrapper.repository.sql.SqlLinksRepository;
 import backend.academy.linktracker.scrapper.repository.sql.SqlTagsRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 
 @Configuration
 @RequiredArgsConstructor

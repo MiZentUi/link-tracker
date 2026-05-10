@@ -1,16 +1,14 @@
 package backend.academy.linktracker.scrapper.repository.sql;
 
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Component;
-
 import backend.academy.linktracker.scrapper.model.Chat;
 import backend.academy.linktracker.scrapper.repository.ChatsRepository;
 import backend.academy.linktracker.scrapper.repository.LinksRepository;
 import backend.academy.linktracker.scrapper.repository.sql.mapper.ChatMapper;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
@@ -31,14 +29,21 @@ public class SqlChatsRepository implements ChatsRepository {
 
     @Override
     public Optional<Chat> findById(Long id) {
-        var chat = jdbcTemplate.query("SELECT * FROM chats WHERE id = ?", new ChatMapper(), id).stream().findAny();
-        if (chat.isPresent()) {
-            chat.get().setLinks(jdbcTemplate.queryForList(
-                    "SELECT link_id FROM chats JOIN links_chats ON chats.id = links_chats.chat_id JOIN links ON links.id = link_id WHERE chats.id = ?",
-                    Long.class, id).stream().map(linksRepository::findById).map(Optional::get)
+        var chat = jdbcTemplate.query("SELECT * FROM chats WHERE id = ?", new ChatMapper(), id).stream()
+                .findAny()
+                .orElse(null);
+        if (chat != null) {
+            chat.setLinks(jdbcTemplate
+                    .queryForList(
+                            "SELECT link_id FROM chats JOIN links_chats ON chats.id = links_chats.chat_id JOIN links ON links.id = link_id WHERE chats.id = ?",
+                            Long.class,
+                            id)
+                    .stream()
+                    .map(linksRepository::findById)
+                    .map(Optional::get)
                     .collect(Collectors.toSet()));
         }
-        return chat;
+        return Optional.of(chat);
     }
 
     @Override

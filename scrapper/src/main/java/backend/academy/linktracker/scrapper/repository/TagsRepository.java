@@ -1,11 +1,9 @@
 package backend.academy.linktracker.scrapper.repository;
 
+import backend.academy.linktracker.scrapper.model.Tag;
 import java.util.List;
 import java.util.Optional;
-
 import org.springframework.stereotype.Repository;
-
-import backend.academy.linktracker.scrapper.model.Tag;
 
 @Repository
 public interface TagsRepository {

@@ -12,10 +12,8 @@ import backend.academy.linktracker.scrapper.repository.LinksRepository;
 import backend.academy.linktracker.scrapper.repository.TagsRepository;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
-
 import java.util.HashSet;
 import java.util.List;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -31,10 +29,15 @@ public class LinksService {
     private final TagsRepository tagsRepository;
 
     public ListLinksResponse getListResponse(Long chatId) {
-        var chat = chatsRepository.findById(chatId).orElseThrow(
-                () -> new ChatNotFoundException(String.format("Chat id=%d not exists in repository", chatId)));
+        var chat = chatsRepository
+                .findById(chatId)
+                .orElseThrow(
+                        () -> new ChatNotFoundException(String.format("Chat id=%d not exists in repository", chatId)));
         var links = chat.getLinks().stream()
-                .map(l -> new LinkResponse(l.getId(), l.getUrl(), l.getTags().stream().map(Tag::getName).toList()))
+                .map(l -> new LinkResponse(
+                        l.getId(),
+                        l.getUrl(),
+                        l.getTags().stream().map(Tag::getName).toList()))
                 .toList();
         log.atInfo()
                 .addKeyValue("links", links.stream().map(LinkResponse::getUrl).reduce((a, b) -> a + " " + b + " "))
@@ -45,18 +48,17 @@ public class LinksService {
     @Transactional
     public LinkResponse addLink(@NotNull String url, @NotNull List<String> tags, @NotNull Long chatId) {
         var link = linksRepository.findByUrl(url);
-        var chat = chatsRepository.findById(chatId).orElseThrow(
-                () -> new ChatNotFoundException(String.format("Chat id=%d not exists in repository", chatId)));
+        var chat = chatsRepository
+                .findById(chatId)
+                .orElseThrow(
+                        () -> new ChatNotFoundException(String.format("Chat id=%d not exists in repository", chatId)));
         log.atInfo()
                 .addKeyValue("url", url)
                 .addKeyValue("tags", tags)
                 .addKeyValue("chatId", chatId)
                 .log("try add link");
         if (link == null) {
-            link = Link.builder()
-                    .url(url)
-                    .chats(new HashSet<>())
-                    .build();
+            link = Link.builder().url(url).chats(new HashSet<>()).build();
             linksRepository.save(link);
         } else {
             if (link.getChats().stream().anyMatch(c -> c.getId().equals(chat.getId()))) {
@@ -65,17 +67,16 @@ public class LinksService {
         }
         link.getChats().add(chat);
         for (var tag : tags) {
-            tagsRepository.save(Tag.builder()
-                    .chat(chat)
-                    .link(link)
-                    .name(tag)
-                    .build());
+            tagsRepository.save(Tag.builder().chat(chat).link(link).name(tag).build());
         }
         linksRepository.save(link);
         if (link.getTags() == null) {
             return new LinkResponse(link.getId(), link.getUrl(), tags);
         }
-        return new LinkResponse(link.getId(), link.getUrl(), link.getTags().stream().map(Tag::getName).toList());
+        return new LinkResponse(
+                link.getId(),
+                link.getUrl(),
+                link.getTags().stream().map(Tag::getName).toList());
     }
 
     @Transactional
@@ -85,9 +86,12 @@ public class LinksService {
         if (link == null) {
             throw new LinkNotFoundException(String.format("Link with url=%s not exists in repository", url));
         } else {
-            link.getChats().removeIf(c -> c.getId().equals(chatsRepository.findById(chatId).orElseThrow(
-                    () -> new ChatNotFoundException(String.format("Chat id=%d not exists in repository", chatId)))
-                    .getId()));
+            link.getChats().removeIf(c -> c.getId()
+                    .equals(chatsRepository
+                            .findById(chatId)
+                            .orElseThrow(() -> new ChatNotFoundException(
+                                    String.format("Chat id=%d not exists in repository", chatId)))
+                            .getId()));
             if (link.getChats().isEmpty()) {
                 for (var tag : link.getTags()) {
                     tagsRepository.delete(tag);
@@ -97,6 +101,9 @@ public class LinksService {
                 linksRepository.save(link);
             }
         }
-        return new LinkResponse(link.getId(), link.getUrl(), link.getTags().stream().map(Tag::getName).toList());
+        return new LinkResponse(
+                link.getId(),
+                link.getUrl(),
+                link.getTags().stream().map(Tag::getName).toList());
     }
 }

@@ -1,15 +1,13 @@
 package backend.academy.linktracker.scrapper.repository.sql;
 
-import java.util.List;
-import java.util.Optional;
-
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Component;
-
 import backend.academy.linktracker.scrapper.model.Tag;
 import backend.academy.linktracker.scrapper.repository.TagsRepository;
 import backend.academy.linktracker.scrapper.repository.sql.mapper.TagMapper;
+import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
@@ -18,9 +16,12 @@ public class SqlTagsRepository implements TagsRepository {
 
     @Override
     public Tag save(Tag tag) {
-        tag.setId(jdbcTemplate.queryForObject("INSERT INTO tags (chat_id, link_id, name) VALUES (?, ?, ?) RETURNING id",
+        tag.setId(jdbcTemplate.queryForObject(
+                "INSERT INTO tags (chat_id, link_id, name) VALUES (?, ?, ?) RETURNING id",
                 Long.class,
-                tag.getChat().getId(), tag.getLink().getId(), tag.getName()));
+                tag.getChat().getId(),
+                tag.getLink().getId(),
+                tag.getName()));
         return tag;
     }
 
@@ -31,7 +32,8 @@ public class SqlTagsRepository implements TagsRepository {
 
     @Override
     public Optional<Tag> findById(Long id) {
-        return jdbcTemplate.query("SELECT * FROM tags WHERE id = ?", new TagMapper(), id).stream().findAny();
+        return jdbcTemplate.query("SELECT * FROM tags WHERE id = ?", new TagMapper(), id).stream()
+                .findAny();
     }
 
     @Override

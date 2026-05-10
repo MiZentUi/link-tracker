@@ -5,15 +5,14 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import backend.academy.linktracker.scrapper.model.Link;
+import backend.academy.linktracker.scrapper.repository.LinksRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.testcontainers.postgresql.PostgreSQLContainer;
-
-import backend.academy.linktracker.scrapper.model.Link;
-import backend.academy.linktracker.scrapper.repository.LinksRepository;
 
 @SpringBootTest
 @Import(TestcontainersConfiguration.class)
@@ -32,19 +31,17 @@ class LinksRepositoryTest {
 
     @Test
     void saveThenFindAndDelete() {
-        var link = Link.builder()
-                .url("https://example.com")
-                .build();
+        var link = Link.builder().url("https://example.com").build();
 
         linksRepository.save(link);
 
         assertNotNull(link.getId());
 
-        var addedLink = linksRepository.findById(link.getId());
+        var addedLink = linksRepository.findById(link.getId()).orElse(null);
 
-        assertTrue(addedLink.isPresent());
-        assertEquals(link.getId(), addedLink.get().getId());
-        assertEquals(link.getUrl(), addedLink.get().getUrl());
+        assertNotNull(addedLink);
+        assertEquals(link.getId(), addedLink.getId());
+        assertEquals(link.getUrl(), addedLink.getUrl());
 
         linksRepository.delete(link);
         var deletedLink = linksRepository.findById(link.getId());
@@ -59,9 +56,7 @@ class LinksRepositoryTest {
 
     @Test
     void findByUrl() {
-        var link = Link.builder()
-                .url("https://example.com")
-                .build();
+        var link = Link.builder().url("https://example.com").build();
 
         linksRepository.save(link);
 

@@ -6,6 +6,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import backend.academy.linktracker.scrapper.repository.ChatsRepository;
+import backend.academy.linktracker.scrapper.repository.LinksRepository;
+import backend.academy.linktracker.scrapper.repository.TagsRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,10 +19,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.postgresql.PostgreSQLContainer;
-
-import backend.academy.linktracker.scrapper.repository.ChatsRepository;
-import backend.academy.linktracker.scrapper.repository.LinksRepository;
-import backend.academy.linktracker.scrapper.repository.TagsRepository;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -60,9 +59,9 @@ class ControllersIntegrationTest {
                 }
                 """;
         mockMvc.perform(post("/links")
-                .header("Tg-Chat-Id", 1)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(addLinkBody))
+                        .header("Tg-Chat-Id", 1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(addLinkBody))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").exists())
                 .andExpect(jsonPath("$.url").value("https://example.com"))
@@ -87,9 +86,9 @@ class ControllersIntegrationTest {
                 }
                 """;
         mockMvc.perform(post("/links")
-                .header("Tg-Chat-Id", 1)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(addLinkBody))
+                        .header("Tg-Chat-Id", 1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(addLinkBody))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.url").value("https://example.com"))
@@ -101,9 +100,9 @@ class ControllersIntegrationTest {
                 }
                 """;
         mockMvc.perform(delete("/links")
-                .header("Tg-Chat-Id", 1)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(deleteLinkBody))
+                        .header("Tg-Chat-Id", 1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(deleteLinkBody))
                 .andExpect(status().isOk());
 
         mockMvc.perform(get("/links").header("Tg-Chat-Id", 1))
@@ -122,9 +121,9 @@ class ControllersIntegrationTest {
                 }
                 """;
         mockMvc.perform(post("/links")
-                .header("Tg-Chat-Id", 1)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(addLinkBody))
+                        .header("Tg-Chat-Id", 1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(addLinkBody))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").exists())
                 .andExpect(jsonPath("$.url").value("https://example.com"))
@@ -151,9 +150,9 @@ class ControllersIntegrationTest {
                 }
                 """;
         mockMvc.perform(post("/links")
-                .header("Tg-Chat-Id", 999)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(addLinkBody))
+                        .header("Tg-Chat-Id", 999)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(addLinkBody))
                 .andExpect(status().isNotFound());
     }
 
@@ -170,9 +169,9 @@ class ControllersIntegrationTest {
                 }
                 """;
         mockMvc.perform(post("/links")
-                .header("Tg-Chat-Id", 999)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(addLinkBody))
+                        .header("Tg-Chat-Id", 999)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(addLinkBody))
                 .andExpect(status().isNotFound());
     }
 
