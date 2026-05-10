@@ -26,3 +26,4 @@ POSTGRES_PASSWORD=admin
 mvn clean package
 docker-compose up --build
 ```
+
