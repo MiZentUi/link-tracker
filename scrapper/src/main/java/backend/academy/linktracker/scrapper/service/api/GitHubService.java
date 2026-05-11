@@ -5,6 +5,7 @@ import backend.academy.linktracker.scrapper.model.Link;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +34,7 @@ public class GitHubService implements ScrapingApiService {
     }
 
     @Override
-    public List<String> getChangesDescriptions(Link link, LocalDateTime since) throws URISyntaxException {
+    public List<String> getChangesDescriptions(Link link, OffsetDateTime since) throws URISyntaxException {
         var repoParts = new URI(link.getUrl()).getPath().replaceFirst("/", "").split("/+");
         var owner = repoParts[0];
         var repo = repoParts[1];
@@ -43,7 +44,7 @@ public class GitHubService implements ScrapingApiService {
             description.append(issue.isPullRequest() ? "Pull Request" : "Issue").append("\n");
             description.append("Название: ").append(issue.getTitle()).append("\n");
             description.append("Пользователь: ").append(issue.getUserLogin()).append("\n");
-            description.append("Время создания: ").append(issue.getCreatedAt().format(DateTimeFormatter.BASIC_ISO_DATE))
+            description.append("Время создания: ").append(issue.getCreatedAt().format(DateTimeFormatter.ISO_DATE_TIME))
                     .append("\n");
             var body = issue.getBody();
             var maxPreviewLen = 200;

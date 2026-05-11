@@ -4,6 +4,7 @@ import backend.academy.linktracker.scrapper.model.Link;
 
 import java.net.URISyntaxException;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 public interface ScrapingApiService {
@@ -11,5 +12,5 @@ public interface ScrapingApiService {
 
     LocalDateTime getLastUpdate(Link link) throws URISyntaxException;
 
-    List<String> getChangesDescriptions(Link link, LocalDateTime since) throws URISyntaxException;
+    List<String> getChangesDescriptions(Link link, OffsetDateTime since) throws URISyntaxException;
 }

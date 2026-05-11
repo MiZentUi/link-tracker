@@ -5,7 +5,9 @@ import backend.academy.linktracker.scrapper.dto.GitHubRepoResponse;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import jakarta.validation.constraints.NotNull;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 import org.springframework.format.annotation.DateTimeFormat;
@@ -24,7 +26,7 @@ public interface GitHubClient {
     List<GitHubIssueResponse> repoIssues(
             @NotNull @PathVariable String owner,
             @NotNull @PathVariable String repo,
-            @NotNull @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime since,
+            @NotNull @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime since,
             @PathVariable String state,
             @PathVariable String sort,
             @PathVariable String direction);

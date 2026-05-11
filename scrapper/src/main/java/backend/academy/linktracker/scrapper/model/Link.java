@@ -12,6 +12,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -49,5 +50,5 @@ public class Link {
     @Builder.Default
     @NotNull
     @Column(name = "last_update")
-    private LocalDateTime lastUpdate = LocalDateTime.now();
+    private OffsetDateTime lastUpdate = OffsetDateTime.now();
 }

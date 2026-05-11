@@ -4,9 +4,8 @@ import backend.academy.linktracker.scrapper.dto.StackOverflowAnswerResponse;
 import backend.academy.linktracker.scrapper.dto.StackOverflowItemsResponse;
 import backend.academy.linktracker.scrapper.dto.StackOverflowQuestionResponse;
 
-import java.time.LocalDateTime;
+import java.sql.Timestamp;
 
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.service.annotation.GetExchange;
@@ -23,7 +22,7 @@ public interface StackOverflowClient {
         @GetExchange("/questions/{id}/answers")
         StackOverflowItemsResponse<StackOverflowAnswerResponse> questionsAnswers(
                         @PathVariable int id,
-                        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fromdate,
+                        @RequestParam Timestamp fromdate,
                         @RequestParam String site,
                         @RequestParam String sort,
                         @RequestParam String order,
@@ -34,7 +33,7 @@ public interface StackOverflowClient {
         @GetExchange("/questions/{id}/comments")
         StackOverflowItemsResponse<StackOverflowAnswerResponse> questionsComments(
                         @PathVariable int id,
-                        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fromdate,
+                        @RequestParam Timestamp fromdate,
                         @RequestParam String site,
                         @RequestParam String sort,
                         @RequestParam String order,

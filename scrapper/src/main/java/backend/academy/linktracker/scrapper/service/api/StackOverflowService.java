@@ -5,8 +5,10 @@ import backend.academy.linktracker.scrapper.model.Link;
 import backend.academy.linktracker.scrapper.properties.StackoverflowProperties;
 
 import java.net.URISyntaxException;
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,7 +54,7 @@ public class StackOverflowService implements ScrapingApiService {
         }
 
         @Override
-        public List<String> getChangesDescriptions(Link link, LocalDateTime since) throws URISyntaxException {
+        public List<String> getChangesDescriptions(Link link, OffsetDateTime since) throws URISyntaxException {
                 var idPattern = Pattern
                                 .compile("https*:\\/\\/(?<site>[A-Za-z0-9]+)\\.com\\/questions\\/(?<id>\\d+)\\/.+");
                 var matcher = idPattern.matcher(link.getUrl());
@@ -67,9 +69,12 @@ public class StackOverflowService implements ScrapingApiService {
                         var title = client.questions(questionId, site, properties.getKey(), properties.getAccessToken())
                                         .getItems()
                                         .getFirst().getTitle();
-                        var answers = client.questionsAnswers(questionId, since, site, "activity", "ask", "!nNPvSNdWme",
+
+                        var timestamp = Timestamp.from(since.toInstant());
+                        var answers = client.questionsAnswers(questionId, timestamp, site, "activity", "ask",
+                                        "!nNPvSNdWme",
                                         properties.getKey(), properties.getAccessToken());
-                        var comments = client.questionsComments(questionId, since, site, "activity", "ask",
+                        var comments = client.questionsComments(questionId, timestamp, site, "activity", "ask",
                                         "!nNPvSN_ZTx",
                                         properties.getKey(), properties.getAccessToken());
 

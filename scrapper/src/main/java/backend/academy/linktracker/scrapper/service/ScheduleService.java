@@ -1,5 +1,8 @@
 package backend.academy.linktracker.scrapper.service;
 
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -11,6 +14,7 @@ import backend.academy.linktracker.scrapper.dto.LinkUpdate;
 import backend.academy.linktracker.scrapper.model.Chat;
 import backend.academy.linktracker.scrapper.repository.LinksRepository;
 import backend.academy.linktracker.scrapper.service.api.ScrapingApiService;
+import backend.academy.linktracker.scrapper.service.sender.MessageSender;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ScheduleService {
     private final LinksRepository linksRepository;
 
-    private final BotClient botClient;
+    private final MessageSender sender;
     private final List<ScrapingApiService> apiServices;
 
     @Transactional
@@ -36,30 +40,41 @@ public class ScheduleService {
                     .orElse(null);
 
             if (apiService == null) {
-                log.atWarn().addKeyValue("link", url).log("api service not exists");
+                log.atWarn().addKeyValue("url", url).log("api service not exists for link");
                 continue;
             }
 
-            log.atInfo().addKeyValue("link", link).log("check link");
+            log.atInfo().addKeyValue("url", url).log("check link");
 
             try {
-                var updatedAt = apiService.getLastUpdate(link);
+                // var updatedAt = apiService.getLastUpdate(link);
                 var lastUpdate = link.getLastUpdate();
-                if (updatedAt != null && updatedAt.isAfter(lastUpdate)) {
-                    for (var description : apiService.getChangesDescriptions(link, lastUpdate)) {
-                        botClient.update(LinkUpdate.builder()
-                                .id(link.getId())
-                                .url(link.getUrl())
-                                .description(description)
-                                .tgChatIds(link.getChats().stream().map(Chat::getId).toList())
-                                .build());
-                    }
-                    link.setLastUpdate(updatedAt);
+
+                // log.atInfo()
+                // .addKeyValue(url, url)
+                // .addKeyValue("updated", updatedAt.format(DateTimeFormatter.ISO_DATE_TIME))
+                // .addKeyValue("last_update",
+                // lastUpdate.format(DateTimeFormatter.ISO_DATE_TIME))
+                // .log("link updates");
+
+                // if (updatedAt != null && updatedAt.isAfter(lastUpdate)) {
+                var descriptions = apiService.getChangesDescriptions(link, lastUpdate);
+                for (var description : descriptions) {
+                    sender.sendLinkUpdate(LinkUpdate.builder()
+                            .id(link.getId())
+                            .url(link.getUrl())
+                            .description(description)
+                            .tgChatIds(link.getChats().stream().map(Chat::getId).toList())
+                            .build());
+                }
+                if (!descriptions.isEmpty()) {
+                    link.setLastUpdate(OffsetDateTime.now());
                     linksRepository.save(link);
                 }
+                // }
             } catch (Exception e) {
                 log.atError().addKeyValue("exception", e.getMessage()).log();
-                botClient.update(LinkUpdate.builder()
+                sender.sendLinkUpdate(LinkUpdate.builder()
                         .id(link.getId())
                         .url(link.getUrl())
                         .description("Ошибка обработки!")
