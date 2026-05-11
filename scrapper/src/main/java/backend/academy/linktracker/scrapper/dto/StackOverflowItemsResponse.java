@@ -1,16 +1,19 @@
 package backend.academy.linktracker.scrapper.dto;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class StackOverflowQuestionResponse {
+public class StackOverflowItemsResponse<T> {
+    private List<T> items;
 
-    @JsonProperty("last_activity_date")
-    private int lastActivityDate;
-    private String title;
+    @JsonProperty("quota_remaining")
+    private int quotaRemaining;
 }

@@ -5,6 +5,10 @@ import backend.academy.linktracker.scrapper.model.Link;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -21,16 +25,32 @@ public class GitHubService implements ScrapingApiService {
     }
 
     @Override
-    public LocalDateTime getLastUpdate(Link link) {
-        try {
-            var repoParts =
-                    new URI(link.getUrl()).getPath().replaceFirst("/", "").split("/+");
-            var owner = repoParts[0];
-            var repo = repoParts[1];
-            return client.repos(owner, repo).getUpdatedAt();
-        } catch (URISyntaxException e) {
-            log.atError().addKeyValue("exception", e.getMessage()).log();
+    public LocalDateTime getLastUpdate(Link link) throws URISyntaxException {
+        var repoParts = new URI(link.getUrl()).getPath().replaceFirst("/", "").split("/+");
+        var owner = repoParts[0];
+        var repo = repoParts[1];
+        return client.repos(owner, repo).getUpdatedAt();
+    }
+
+    @Override
+    public List<String> getChangesDescriptions(Link link, LocalDateTime since) throws URISyntaxException {
+        var repoParts = new URI(link.getUrl()).getPath().replaceFirst("/", "").split("/+");
+        var owner = repoParts[0];
+        var repo = repoParts[1];
+        var descriptions = new ArrayList<String>();
+        for (var issue : client.repoIssues(owner, repo, since, "all", "updated", "ask")) {
+            var description = new StringBuilder();
+            description.append(issue.isPullRequest() ? "Pull Request" : "Issue").append("\n");
+            description.append("Название: ").append(issue.getTitle()).append("\n");
+            description.append("Пользователь: ").append(issue.getUserLogin()).append("\n");
+            description.append("Время создания: ").append(issue.getCreatedAt().format(DateTimeFormatter.BASIC_ISO_DATE))
+                    .append("\n");
+            var body = issue.getBody();
+            var maxPreviewLen = 200;
+            description.append("Превью: ").append(body.substring(0, Math.min(maxPreviewLen, body.length()) - 1))
+                    .append(body.length() > maxPreviewLen ? "..." : "");
+            descriptions.add(description.toString());
         }
-        return null;
+        return descriptions;
     }
 }
