@@ -1,11 +1,9 @@
 package backend.academy.linktracker.scrapper.dto;
 
-import java.util.Map;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
+import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -22,6 +20,7 @@ public class StackOverflowCommentResponse {
     private String ownerName;
 
     @JsonProperty("owner")
+    @SuppressWarnings("PMD.UnusedPrivateMethod")
     private void owner(Map<String, Object> owner) {
         ownerName = (String) owner.get("display_name");
     }

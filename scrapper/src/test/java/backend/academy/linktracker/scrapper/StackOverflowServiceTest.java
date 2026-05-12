@@ -1,24 +1,22 @@
 package backend.academy.linktracker.scrapper;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.okJson;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import backend.academy.linktracker.scrapper.model.Link;
+import backend.academy.linktracker.scrapper.service.api.StackOverflowService;
+import java.net.URISyntaxException;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.wiremock.spring.EnableWireMock;
-
-import static com.github.tomakehurst.wiremock.client.WireMock.get;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
-import static com.github.tomakehurst.wiremock.client.WireMock.okJson;
-import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import java.net.URISyntaxException;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-
-import backend.academy.linktracker.scrapper.model.Link;
-import backend.academy.linktracker.scrapper.service.api.StackOverflowService;
 
 @SpringBootTest
 @EnableWireMock
@@ -74,8 +72,8 @@ class StackOverflowServiceTest {
         stubFor(get(urlPathEqualTo("/questions/123/answers")).willReturn(okJson(answersResponse)));
         stubFor(get(urlPathEqualTo("/questions/123/comments")).willReturn(okJson(commentsResponse)));
 
-        var descriptions = service.getChangesDescriptions(link,
-                OffsetDateTime.of(2008, 8, 1, 0, 0, 0, 0, ZoneOffset.UTC));
+        var descriptions =
+                service.getChangesDescriptions(link, OffsetDateTime.of(2008, 8, 1, 0, 0, 0, 0, ZoneOffset.UTC));
 
         assertEquals(2, descriptions.size());
 
@@ -131,15 +129,16 @@ class StackOverflowServiceTest {
         stubFor(get(urlPathEqualTo("/questions/123/answers")).willReturn(okJson(answersResponse)));
         stubFor(get(urlPathEqualTo("/questions/123/comments")).willReturn(okJson(commentsResponse)));
 
-        var descriptions = service.getChangesDescriptions(link,
-                OffsetDateTime.of(2008, 8, 1, 0, 0, 0, 0, ZoneOffset.UTC));
+        var descriptions =
+                service.getChangesDescriptions(link, OffsetDateTime.of(2008, 8, 1, 0, 0, 0, 0, ZoneOffset.UTC));
 
         assertEquals(1, descriptions.size());
 
         var desc = descriptions.getFirst();
         assertTrue(desc.contains("title"));
         assertTrue(desc.contains("saint_groceon"));
-        assertTrue(desc.contains(
-                "body1body1body1body1body1body1body1body1body1body1body1body1body1body1body1body1body1body1body1body1body1body1body1body1body1body1body1body1body1body1body1body1body1body1body1body1body1body1body1body1..."));
+        assertTrue(
+                desc.contains(
+                        "body1body1body1body1body1body1body1body1body1body1body1body1body1body1body1body1body1body1body1body1body1body1body1body1body1body1body1body1body1body1body1body1body1body1body1body1body1body1body1body1..."));
     }
 }

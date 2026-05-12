@@ -4,7 +4,6 @@ import backend.academy.linktracker.scrapper.model.Link;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.ZoneOffset;
-
 import org.springframework.jdbc.core.RowMapper;
 
 public class LinkMapper implements RowMapper<Link> {

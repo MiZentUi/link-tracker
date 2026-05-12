@@ -40,7 +40,10 @@ public class Link {
     private String url;
 
     @ManyToMany
-    @JoinTable(name = "links_chats", joinColumns = @JoinColumn(name = "link_id"), inverseJoinColumns = @JoinColumn(name = "chat_id"))
+    @JoinTable(
+            name = "links_chats",
+            joinColumns = @JoinColumn(name = "link_id"),
+            inverseJoinColumns = @JoinColumn(name = "chat_id"))
     private Set<Chat> chats;
 
     @OneToMany(mappedBy = "link")

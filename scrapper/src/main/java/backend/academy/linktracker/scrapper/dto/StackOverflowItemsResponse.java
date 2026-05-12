@@ -1,10 +1,8 @@
 package backend.academy.linktracker.scrapper.dto;
 
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 

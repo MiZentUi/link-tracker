@@ -1,7 +1,6 @@
 package backend.academy.linktracker.scrapper.service.api;
 
 import backend.academy.linktracker.scrapper.model.Link;
-
 import java.net.URISyntaxException;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;

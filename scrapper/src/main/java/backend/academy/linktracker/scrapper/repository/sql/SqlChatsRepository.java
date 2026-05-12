@@ -58,9 +58,8 @@ public class SqlChatsRepository implements ChatsRepository {
 
     @Override
     public boolean existsById(Long id) {
-        var exists = jdbcTemplate.queryForObject("SELECT EXISTS(SELECT 1 FROM chats WHERE id = ? LIMIT 1)",
-                Boolean.class,
-                id);
+        var exists = jdbcTemplate.queryForObject(
+                "SELECT EXISTS(SELECT 1 FROM chats WHERE id = ? LIMIT 1)", Boolean.class, id);
         return exists != null && exists;
     }
 }

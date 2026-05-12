@@ -4,10 +4,8 @@ import backend.academy.linktracker.scrapper.dto.GitHubIssueResponse;
 import backend.academy.linktracker.scrapper.dto.GitHubRepoResponse;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import jakarta.validation.constraints.NotNull;
-
 import java.time.OffsetDateTime;
 import java.util.List;
-
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;

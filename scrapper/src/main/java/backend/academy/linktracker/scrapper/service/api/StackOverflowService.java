@@ -3,7 +3,6 @@ package backend.academy.linktracker.scrapper.service.api;
 import backend.academy.linktracker.scrapper.client.StackOverflowClient;
 import backend.academy.linktracker.scrapper.model.Link;
 import backend.academy.linktracker.scrapper.properties.StackoverflowProperties;
-
 import java.net.URISyntaxException;
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -31,8 +30,7 @@ public class StackOverflowService implements ScrapingApiService {
 
     @Override
     public LocalDateTime getLastUpdate(Link link) throws URISyntaxException {
-        var idPattern = Pattern
-                .compile("https*:\\/\\/(?<site>[A-Za-z0-9]+)\\.com\\/questions\\/(?<id>\\d+)\\/.+");
+        var idPattern = Pattern.compile("https*:\\/\\/(?<site>[A-Za-z0-9]+)\\.com\\/questions\\/(?<id>\\d+)\\/.+");
         var matcher = idPattern.matcher(link.getUrl());
         if (matcher.find()) {
             var questionId = Integer.parseInt(matcher.group("id"));
@@ -41,8 +39,7 @@ public class StackOverflowService implements ScrapingApiService {
                     .addKeyValue("site", site)
                     .addKeyValue("question_id", questionId)
                     .log();
-            var response = client.questions(questionId, site, properties.getKey(),
-                    properties.getAccessToken());
+            var response = client.questions(questionId, site, properties.getKey(), properties.getAccessToken());
             log.atInfo()
                     .addKeyValue("quota_remaining", response.getQuotaRemaining())
                     .log();
@@ -55,8 +52,7 @@ public class StackOverflowService implements ScrapingApiService {
 
     @Override
     public List<String> getChangesDescriptions(Link link, OffsetDateTime since) throws URISyntaxException {
-        var idPattern = Pattern
-                .compile("https*:\\/\\/(?<site>[A-Za-z0-9]+)\\.com\\/questions\\/(?<id>\\d+)\\/.+");
+        var idPattern = Pattern.compile("https*:\\/\\/(?<site>[A-Za-z0-9]+)\\.com\\/questions\\/(?<id>\\d+)\\/.+");
         var matcher = idPattern.matcher(link.getUrl());
         var descriptions = new ArrayList<String>();
         if (matcher.find()) {
@@ -68,31 +64,48 @@ public class StackOverflowService implements ScrapingApiService {
                     .log();
             var title = client.questions(questionId, site, properties.getKey(), properties.getAccessToken())
                     .getItems()
-                    .getFirst().getTitle();
+                    .getFirst()
+                    .getTitle();
 
             var timestamp = Timestamp.from(since.toInstant());
             var params = properties.getParams();
-            var answers = client.questionsAnswers(questionId, timestamp, site, params.sort(),
+            var answers = client.questionsAnswers(
+                    questionId,
+                    timestamp,
+                    site,
+                    params.sort(),
                     params.order(),
                     params.filter(),
-                    properties.getKey(), properties.getAccessToken());
-            var comments = client.questionsComments(questionId, timestamp, site, "activity", "ask",
+                    properties.getKey(),
+                    properties.getAccessToken());
+            var comments = client.questionsComments(
+                    questionId,
+                    timestamp,
+                    site,
+                    "activity",
+                    "ask",
                     "!nNPvSN_ZTx",
-                    properties.getKey(), properties.getAccessToken());
+                    properties.getKey(),
+                    properties.getAccessToken());
 
             for (var answer : answers.getItems()) {
                 var description = new StringBuilder();
                 description.append("Вопрос: ").append(title).append("\n");
-                description.append("Пользователь: ").append(answer.getOwnerName()).append("\n");
-                description.append("Время создания: ")
+                description
+                        .append("Пользователь: ")
+                        .append(answer.getOwnerName())
+                        .append("\n");
+                description
+                        .append("Время создания: ")
                         .append(LocalDateTime.ofInstant(
-                                Instant.ofEpochMilli(answer.getCreationDate()),
-                                TimeZone.getDefault().toZoneId())
+                                        Instant.ofEpochMilli(answer.getCreationDate()),
+                                        TimeZone.getDefault().toZoneId())
                                 .format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")))
                         .append("\n");
                 var body = answer.getBody();
                 var maxPreviewLen = 200;
-                description.append("Превью: ")
+                description
+                        .append("Превью: ")
                         .append(body.substring(0, Math.min(maxPreviewLen, body.length())))
                         .append(body.length() > maxPreviewLen ? "..." : "");
                 descriptions.add(description.toString());
@@ -101,16 +114,21 @@ public class StackOverflowService implements ScrapingApiService {
             for (var comment : comments.getItems()) {
                 var description = new StringBuilder();
                 description.append("Вопрос: ").append(title).append("\n");
-                description.append("Пользователь: ").append(comment.getOwnerName()).append("\n");
-                description.append("Время создания: ")
+                description
+                        .append("Пользователь: ")
+                        .append(comment.getOwnerName())
+                        .append("\n");
+                description
+                        .append("Время создания: ")
                         .append(LocalDateTime.ofInstant(
-                                Instant.ofEpochMilli(comment.getCreationDate()),
-                                TimeZone.getDefault().toZoneId())
+                                        Instant.ofEpochMilli(comment.getCreationDate()),
+                                        TimeZone.getDefault().toZoneId())
                                 .format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")))
                         .append("\n");
                 var body = comment.getBody();
                 var maxPreviewLen = 200;
-                description.append("Превью: ")
+                description
+                        .append("Превью: ")
                         .append(body.substring(0, Math.min(maxPreviewLen, body.length())))
                         .append(body.length() > maxPreviewLen ? "..." : "");
                 descriptions.add(description.toString());

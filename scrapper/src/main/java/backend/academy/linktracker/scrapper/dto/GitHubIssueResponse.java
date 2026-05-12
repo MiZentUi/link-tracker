@@ -1,12 +1,10 @@
 package backend.academy.linktracker.scrapper.dto;
 
-import java.time.LocalDateTime;
-import java.util.Map;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
+import java.time.LocalDateTime;
+import java.util.Map;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -27,11 +25,13 @@ public class GitHubIssueResponse {
     private boolean pullRequest;
 
     @JsonProperty("user")
+    @SuppressWarnings("PMD.UnusedPrivateMethod")
     private void unpackUserLogin(Map<String, Object> user) {
         userLogin = (String) user.get("login");
     }
 
     @JsonProperty("pull_request")
+    @SuppressWarnings("PMD.UnusedPrivateMethod")
     private void checkPullRequest(Map<String, Object> pullRequest) {
         this.pullRequest = pullRequest != null;
     }

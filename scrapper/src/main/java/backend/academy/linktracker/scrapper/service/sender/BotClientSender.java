@@ -1,10 +1,9 @@
 package backend.academy.linktracker.scrapper.service.sender;
 
-import org.springframework.stereotype.Service;
-
 import backend.academy.linktracker.scrapper.client.BotClient;
 import backend.academy.linktracker.scrapper.dto.LinkUpdate;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor

@@ -12,5 +12,6 @@ public class StackOverflowQuestionResponse {
 
     @JsonProperty("last_activity_date")
     private int lastActivityDate;
+
     private String title;
 }

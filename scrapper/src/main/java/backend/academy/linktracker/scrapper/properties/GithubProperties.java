@@ -16,12 +16,7 @@ import org.springframework.validation.annotation.Validated;
 @EqualsAndHashCode
 @NoArgsConstructor
 public class GithubProperties {
-    public record Params(
-            String state,
-            String sort,
-            String direction,
-            int perPage) {
-    }
+    public record Params(String state, String sort, String direction, int perPage) {}
 
     @NotEmpty
     private String baseUrl;
