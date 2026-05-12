@@ -53,7 +53,7 @@ public class GitHubService implements ScrapingApiService {
                     .append("\n");
             var body = issue.getBody();
             var maxPreviewLen = 200;
-            description.append("Превью: ").append(body.substring(0, Math.min(maxPreviewLen, body.length()) - 1))
+            description.append("Превью: ").append(body.substring(0, Math.min(maxPreviewLen, body.length())))
                     .append(body.length() > maxPreviewLen ? "..." : "");
             descriptions.add(description.toString());
         }

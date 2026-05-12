@@ -93,7 +93,7 @@ public class StackOverflowService implements ScrapingApiService {
                 var body = answer.getBody();
                 var maxPreviewLen = 200;
                 description.append("Превью: ")
-                        .append(body.substring(0, Math.min(maxPreviewLen, body.length()) - 1))
+                        .append(body.substring(0, Math.min(maxPreviewLen, body.length())))
                         .append(body.length() > maxPreviewLen ? "..." : "");
                 descriptions.add(description.toString());
             }
@@ -111,7 +111,7 @@ public class StackOverflowService implements ScrapingApiService {
                 var body = comment.getBody();
                 var maxPreviewLen = 200;
                 description.append("Превью: ")
-                        .append(body.substring(0, Math.min(maxPreviewLen, body.length()) - 1))
+                        .append(body.substring(0, Math.min(maxPreviewLen, body.length())))
                         .append(body.length() > maxPreviewLen ? "..." : "");
                 descriptions.add(description.toString());
             }

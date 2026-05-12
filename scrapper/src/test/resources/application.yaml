@@ -20,7 +20,7 @@ app:
   bot:
     base-url: ${BOT_URL:http://localhost:8080}
   stackoverflow:
-    base-url: https://api.stackexchange.com/2.1
+    base-url: ${wiremock.server.baseUrl}
     key: ${STACKOVERFLOW_KEY} # Use env variable. DO NOT KEEP TOKEN HERE
     access-token: ${STACKOVERFLOW_ACCESS_TOKEN} # Use env variable. DO NOT KEEP TOKEN HERE
     params:
@@ -28,7 +28,7 @@ app:
       order: ask
       filter: "!nNPvSNdWme"
   github:
-    base-url: https://api.github.com
+    base-url: ${wiremock.server.baseUrl}
     token: ${GITHUB_TOKEN} # Use env variable. DO NOT KEEP TOKEN HERE
     params:
       state: all

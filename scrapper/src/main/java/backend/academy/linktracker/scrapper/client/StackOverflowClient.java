@@ -1,6 +1,7 @@
 package backend.academy.linktracker.scrapper.client;
 
 import backend.academy.linktracker.scrapper.dto.StackOverflowAnswerResponse;
+import backend.academy.linktracker.scrapper.dto.StackOverflowCommentResponse;
 import backend.academy.linktracker.scrapper.dto.StackOverflowItemsResponse;
 import backend.academy.linktracker.scrapper.dto.StackOverflowQuestionResponse;
 
@@ -19,6 +20,13 @@ public interface StackOverflowClient {
                         @RequestParam String key,
                         @RequestParam("access_token") String accessToken);
 
+        @GetExchange("/questions/{id}")
+        StackOverflowItemsResponse<String> questionss(
+                        @PathVariable int id,
+                        @RequestParam String site,
+                        @RequestParam String key,
+                        @RequestParam("access_token") String accessToken);
+
         @GetExchange("/questions/{id}/answers")
         StackOverflowItemsResponse<StackOverflowAnswerResponse> questionsAnswers(
                         @PathVariable int id,
@@ -31,7 +39,7 @@ public interface StackOverflowClient {
                         @RequestParam("access_token") String accessToken);
 
         @GetExchange("/questions/{id}/comments")
-        StackOverflowItemsResponse<StackOverflowAnswerResponse> questionsComments(
+        StackOverflowItemsResponse<StackOverflowCommentResponse> questionsComments(
                         @PathVariable int id,
                         @RequestParam Timestamp fromdate,
                         @RequestParam String site,
