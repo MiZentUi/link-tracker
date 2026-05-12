@@ -5,8 +5,6 @@ import backend.academy.linktracker.scrapper.dto.GitHubRepoResponse;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import jakarta.validation.constraints.NotNull;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.List;
 
@@ -29,5 +27,6 @@ public interface GitHubClient {
             @NotNull @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime since,
             @PathVariable String state,
             @PathVariable String sort,
-            @PathVariable String direction);
+            @PathVariable String direction,
+            @PathVariable("per_page") int perPage);
 }

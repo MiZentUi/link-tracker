@@ -2,6 +2,8 @@ package backend.academy.linktracker.scrapper.service.api;
 
 import backend.academy.linktracker.scrapper.client.GitHubClient;
 import backend.academy.linktracker.scrapper.model.Link;
+import backend.academy.linktracker.scrapper.properties.GithubProperties;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.LocalDateTime;
@@ -19,6 +21,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class GitHubService implements ScrapingApiService {
     private final GitHubClient client;
+    private final GithubProperties properties;
 
     @Override
     public String getBaseUrl() {
@@ -39,7 +42,9 @@ public class GitHubService implements ScrapingApiService {
         var owner = repoParts[0];
         var repo = repoParts[1];
         var descriptions = new ArrayList<String>();
-        for (var issue : client.repoIssues(owner, repo, since, "all", "updated", "ask")) {
+        var params = properties.getParams();
+        for (var issue : client.repoIssues(owner, repo, since, params.state(), params.sort(), params.direction(),
+                params.perPage())) {
             var description = new StringBuilder();
             description.append(issue.isPullRequest() ? "Pull Request" : "Issue").append("\n");
             description.append("Название: ").append(issue.getTitle()).append("\n");
