@@ -88,7 +88,7 @@ public class StackOverflowService implements ScrapingApiService {
                         .append(LocalDateTime.ofInstant(
                                 Instant.ofEpochMilli(answer.getCreationDate()),
                                 TimeZone.getDefault().toZoneId())
-                                .format(DateTimeFormatter.BASIC_ISO_DATE))
+                                .format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")))
                         .append("\n");
                 var body = answer.getBody();
                 var maxPreviewLen = 200;
@@ -106,7 +106,7 @@ public class StackOverflowService implements ScrapingApiService {
                         .append(LocalDateTime.ofInstant(
                                 Instant.ofEpochMilli(comment.getCreationDate()),
                                 TimeZone.getDefault().toZoneId())
-                                .format(DateTimeFormatter.BASIC_ISO_DATE))
+                                .format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")))
                         .append("\n");
                 var body = comment.getBody();
                 var maxPreviewLen = 200;

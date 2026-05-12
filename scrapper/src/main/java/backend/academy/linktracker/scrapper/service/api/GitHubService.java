@@ -49,7 +49,8 @@ public class GitHubService implements ScrapingApiService {
             description.append(issue.isPullRequest() ? "Pull Request" : "Issue").append("\n");
             description.append("Название: ").append(issue.getTitle()).append("\n");
             description.append("Пользователь: ").append(issue.getUserLogin()).append("\n");
-            description.append("Время создания: ").append(issue.getCreatedAt().format(DateTimeFormatter.ISO_DATE_TIME))
+            description.append("Время создания: ")
+                    .append(issue.getCreatedAt().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")))
                     .append("\n");
             var body = issue.getBody();
             var maxPreviewLen = 200;

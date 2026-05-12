@@ -20,13 +20,6 @@ public interface StackOverflowClient {
                         @RequestParam String key,
                         @RequestParam("access_token") String accessToken);
 
-        @GetExchange("/questions/{id}")
-        StackOverflowItemsResponse<String> questionss(
-                        @PathVariable int id,
-                        @RequestParam String site,
-                        @RequestParam String key,
-                        @RequestParam("access_token") String accessToken);
-
         @GetExchange("/questions/{id}/answers")
         StackOverflowItemsResponse<StackOverflowAnswerResponse> questionsAnswers(
                         @PathVariable int id,

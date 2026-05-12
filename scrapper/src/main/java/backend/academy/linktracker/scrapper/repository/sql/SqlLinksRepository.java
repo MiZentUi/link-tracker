@@ -12,6 +12,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -55,6 +59,20 @@ public class SqlLinksRepository implements LinksRepository {
     }
 
     @Override
+    public Slice<Link> findAll(Pageable pageable) {
+        var links = jdbcTemplate.query("SELECT * FROM links WHERE id > ? LIMIT ?", new LinkMapper(),
+                pageable.getOffset(),
+                pageable.getPageSize());
+        var hasNext = jdbcTemplate.queryForObject("SELECT EXISTS(SELECT 1 FROM chats WHERE id > ? LIMIT 1)",
+                Boolean.class, pageable.getOffset());
+        for (var link : links) {
+            link.setChats(getChats(link.getId()));
+            link.setTags(getTags(link.getId()));
+        }
+        return new SliceImpl<>(links, pageable, hasNext != null && hasNext);
+    }
+
+    @Override
     public Link findByUrl(String url) {
         var link = jdbcTemplate.query("SELECT * FROM links WHERE url = ? LIMIT 1", new LinkMapper(), url).stream()
                 .findAny()
@@ -68,12 +86,11 @@ public class SqlLinksRepository implements LinksRepository {
 
     @Override
     public Optional<Link> findById(Long id) {
-        var link =
-                jdbcTemplate
-                        .query("SELECT * FROM links WHERE id = ?", new BeanPropertyRowMapper<>(Link.class), id)
-                        .stream()
-                        .findAny()
-                        .orElse(null);
+        var link = jdbcTemplate
+                .query("SELECT * FROM links WHERE id = ?", new BeanPropertyRowMapper<>(Link.class), id)
+                .stream()
+                .findAny()
+                .orElse(null);
         if (link != null) {
             link.setChats(getChats(link.getId()));
             link.setTags(getTags(link.getId()));

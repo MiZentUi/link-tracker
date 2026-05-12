@@ -2,13 +2,16 @@ package backend.academy.linktracker.scrapper.service;
 
 import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import backend.academy.linktracker.scrapper.dto.LinkUpdate;
 import backend.academy.linktracker.scrapper.model.Chat;
+import backend.academy.linktracker.scrapper.model.Link;
+import backend.academy.linktracker.scrapper.properties.SchedulerProperties;
 import backend.academy.linktracker.scrapper.repository.LinksRepository;
 import backend.academy.linktracker.scrapper.service.api.ScrapingApiService;
 import backend.academy.linktracker.scrapper.service.sender.MessageSender;
@@ -20,15 +23,26 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 public class ScheduleService {
+    private final SchedulerProperties properties;
+
     private final LinksRepository linksRepository;
 
     private final MessageSender sender;
     private final List<ScrapingApiService> apiServices;
 
     @Transactional
-    @Scheduled(fixedDelayString = "${app.updates.fixed-delay.in.seconds}", timeUnit = TimeUnit.SECONDS)
+    @Scheduled(fixedDelayString = "#{@schedulerProperties.updatesDelay}")
     public void checkUpdates() {
-        var links = linksRepository.findAll();
+        var pageable = PageRequest.of(0, properties.getLinksPerPage());
+        Slice<Link> links;
+        do {
+            links = linksRepository.findAll(pageable);
+            updateSlice(links);
+            pageable = pageable.next();
+        } while (links.hasNext());
+    }
+
+    private void updateSlice(Slice<Link> links) {
         for (var link : links) {
             var url = link.getUrl();
             var apiService = apiServices.stream()
@@ -66,6 +80,8 @@ public class ScheduleService {
                         .description("Ошибка обработки!")
                         .tgChatIds(link.getChats().stream().map(Chat::getId).toList())
                         .build());
+                link.setLastUpdate(OffsetDateTime.now());
+                linksRepository.save(link);
             }
         }
     }

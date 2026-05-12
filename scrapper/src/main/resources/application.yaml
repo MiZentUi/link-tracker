@@ -35,9 +35,8 @@ app:
       sort: updated
       direction: ask
       per-page: 100
-  updates:
-    fixed-delay:
-      in:
-        seconds: 10
+  scheduler:
+    updates-delay: 10s
+    links-per-page: 10
   repository:
     access-type: ORM
