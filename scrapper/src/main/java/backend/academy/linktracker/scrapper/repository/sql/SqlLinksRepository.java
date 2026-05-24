@@ -1,21 +1,14 @@
 package backend.academy.linktracker.scrapper.repository.sql;
 
-import backend.academy.linktracker.scrapper.model.Chat;
 import backend.academy.linktracker.scrapper.model.Link;
-import backend.academy.linktracker.scrapper.model.Tag;
 import backend.academy.linktracker.scrapper.repository.LinksRepository;
-import backend.academy.linktracker.scrapper.repository.sql.mapper.ChatMapper;
-import backend.academy.linktracker.scrapper.repository.sql.mapper.LinkMapper;
-import backend.academy.linktracker.scrapper.repository.sql.mapper.TagMapper;
+import backend.academy.linktracker.scrapper.repository.sql.mapper.LinksExtractor;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
@@ -49,77 +42,46 @@ public class SqlLinksRepository implements LinksRepository {
 
     @Override
     public List<Link> findAll() {
-        var links = jdbcTemplate.query("SELECT * FROM links", new LinkMapper());
-        for (var link : links) {
-            link.setChats(getChats(link.getId()));
-            link.setTags(getTags(link.getId()));
-        }
-        return links;
+        return jdbcTemplate.query(
+                "SELECT l.id, l.url, l.last_update, ls.chat_id, t.id as tag_id, t.name as tag_name FROM links l JOIN links_chats lc ON l.id = lc.link_id JOIN tags t ON l.id = t.id",
+                new LinksExtractor());
     }
 
     @Override
     public Slice<Link> findAll(Pageable pageable) {
         var links = jdbcTemplate.query(
-                "SELECT * FROM links WHERE id > ? LIMIT ?",
-                new LinkMapper(),
+                "SELECT l.id, l.url, l.last_update, ls.chat_id, t.id as tag_id, t.name as tag_name FROM links l JOIN links_chats lc ON l.id = lc.link_id JOIN tags t ON l.id = t.id WHERE id > ? LIMIT ?",
+                new LinksExtractor(),
                 pageable.getOffset(),
                 pageable.getPageSize());
         var hasNext = jdbcTemplate.queryForObject(
                 "SELECT EXISTS(SELECT 1 FROM links WHERE id > ? LIMIT 1)",
                 Boolean.class,
                 pageable.next().getOffset());
-        for (var link : links) {
-            link.setChats(getChats(link.getId()));
-            link.setTags(getTags(link.getId()));
-        }
         return new SliceImpl<>(links, pageable, hasNext != null && hasNext);
     }
 
     @Override
     public Link findByUrl(String url) {
-        var link = jdbcTemplate.query("SELECT * FROM links WHERE url = ? LIMIT 1", new LinkMapper(), url).stream()
+        return jdbcTemplate
+                .query(
+                        "SELECT l.id, l.url, l.last_update, ls.chat_id, t.id as tag_id, t.name as tag_name FROM (SELECT * FROM links LIMIT 1) l JOIN links_chats lc ON l.id = lc.link_id JOIN tags t ON l.id = t.id",
+                        new LinksExtractor(),
+                        url)
+                .stream()
                 .findAny()
                 .orElse(null);
-        if (link != null) {
-            link.setChats(getChats(link.getId()));
-            link.setTags(getTags(link.getId()));
-        }
-        return link;
     }
 
     @Override
     public Optional<Link> findById(Long id) {
-        var link =
-                jdbcTemplate
-                        .query("SELECT * FROM links WHERE id = ?", new BeanPropertyRowMapper<>(Link.class), id)
-                        .stream()
-                        .findAny()
-                        .orElse(null);
-        if (link != null) {
-            link.setChats(getChats(link.getId()));
-            link.setTags(getTags(link.getId()));
-        }
-        return Optional.of(link);
-    }
-
-    private Set<Chat> getChats(Long id) {
         return jdbcTemplate
                 .query(
-                        "SELECT chats.id FROM links JOIN links_chats ON links.id = links_chats.link_id JOIN chats ON chats.id = chat_id WHERE links.id = ?",
-                        new ChatMapper(),
+                        "SELECT l.id, l.url, l.last_update, ls.chat_id, t.id as tag_id, t.name as tag_name FROM links l JOIN links_chats lc ON l.id = lc.link_id JOIN tags t ON l.id = t.id WHERE l.id = ?",
+                        new LinksExtractor(),
                         id)
                 .stream()
-                .collect(Collectors.toSet());
-    }
-
-    private Set<Tag> getTags(Long id) {
-        return jdbcTemplate
-                .query(
-                        "SELECT tags.id, tags.name FROM links JOIN tags ON links.id = tags.link_id WHERE links.id = ?",
-                        new TagMapper(),
-                        id)
-                .stream()
-                .collect(Collectors.toSet());
+                .findAny();
     }
 
     @Override

@@ -9,7 +9,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import backend.academy.linktracker.scrapper.model.Link;
 import backend.academy.linktracker.scrapper.service.api.StackOverflowService;
-import java.net.URISyntaxException;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import org.junit.jupiter.api.Test;
@@ -27,7 +26,7 @@ class StackOverflowServiceTest {
     private StackOverflowService service;
 
     @Test
-    void newUpdates() throws URISyntaxException {
+    void newUpdates() {
         var link = Link.builder()
                 .url("https://stackoverflow.com/questions/123/java-lib-or-app-to-convert-csv-to-xml-file")
                 .build();
@@ -89,7 +88,7 @@ class StackOverflowServiceTest {
     }
 
     @Test
-    void longBody() throws URISyntaxException {
+    void longBody() {
         var link = Link.builder()
                 .url("https://stackoverflow.com/questions/123/java-lib-or-app-to-convert-csv-to-xml-file")
                 .build();

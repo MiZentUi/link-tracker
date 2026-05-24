@@ -9,7 +9,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import backend.academy.linktracker.scrapper.model.Link;
 import backend.academy.linktracker.scrapper.service.api.GitHubService;
-import java.net.URISyntaxException;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import org.junit.jupiter.api.Test;
@@ -27,7 +26,7 @@ class GitHubServiceTest {
     private GitHubService service;
 
     @Test
-    void newIssues() throws URISyntaxException {
+    void newIssues() {
         var link =
                 Link.builder().url("https://github.com/MiZentUi/link-tracker").build();
 
@@ -74,7 +73,7 @@ class GitHubServiceTest {
     }
 
     @Test
-    void longBody() throws URISyntaxException {
+    void longBody() {
         var link =
                 Link.builder().url("https://github.com/MiZentUi/link-tracker").build();
 
