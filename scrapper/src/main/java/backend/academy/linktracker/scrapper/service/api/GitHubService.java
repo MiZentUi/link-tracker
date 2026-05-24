@@ -1,6 +1,7 @@
 package backend.academy.linktracker.scrapper.service.api;
 
 import backend.academy.linktracker.scrapper.client.GitHubClient;
+import backend.academy.linktracker.scrapper.exception.LinkException;
 import backend.academy.linktracker.scrapper.model.Link;
 import backend.academy.linktracker.scrapper.properties.GithubProperties;
 import java.net.URI;
@@ -27,38 +28,56 @@ public class GitHubService implements ScrapingApiService {
     }
 
     @Override
-    public LocalDateTime getLastUpdate(Link link) throws URISyntaxException {
-        var repoParts = new URI(link.getUrl()).getPath().replaceFirst("/", "").split("/+");
-        var owner = repoParts[0];
-        var repo = repoParts[1];
-        return client.repos(owner, repo).getUpdatedAt();
+    public LocalDateTime getLastUpdate(Link link) {
+        try {
+            var repoParts =
+                    new URI(link.getUrl()).getPath().replaceFirst("/", "").split("/+");
+            var owner = repoParts[0];
+            var repo = repoParts[1];
+            return client.repos(owner, repo).getUpdatedAt();
+        } catch (URISyntaxException e) {
+            throw new LinkException(e);
+        }
     }
 
     @Override
-    public List<String> getChangesDescriptions(Link link, OffsetDateTime since) throws URISyntaxException {
-        var repoParts = new URI(link.getUrl()).getPath().replaceFirst("/", "").split("/+");
-        var owner = repoParts[0];
-        var repo = repoParts[1];
-        var descriptions = new ArrayList<String>();
-        var params = properties.getParams();
-        for (var issue : client.repoIssues(
-                owner, repo, since, params.state(), params.sort(), params.direction(), params.perPage())) {
-            var description = new StringBuilder();
-            description.append(issue.isPullRequest() ? "Pull Request" : "Issue").append("\n");
-            description.append("Название: ").append(issue.getTitle()).append("\n");
-            description.append("Пользователь: ").append(issue.getUserLogin()).append("\n");
-            description
-                    .append("Время создания: ")
-                    .append(issue.getCreatedAt().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")))
-                    .append("\n");
-            var body = issue.getBody();
-            var maxPreviewLen = 200;
-            description
-                    .append("Превью: ")
-                    .append(body.substring(0, Math.min(maxPreviewLen, body.length())))
-                    .append(body.length() > maxPreviewLen ? "..." : "");
-            descriptions.add(description.toString());
+    public List<String> getChangesDescriptions(Link link, OffsetDateTime since) {
+        try {
+            var repoParts =
+                    new URI(link.getUrl()).getPath().replaceFirst("/", "").split("/+");
+            var owner = repoParts[0];
+            var repo = repoParts[1];
+            var descriptions = new ArrayList<String>();
+            var params = properties.getParams();
+            for (var issue : client.repoIssues(
+                    owner, repo, since, params.state(), params.sort(), params.direction(), params.perPage())) {
+                var description = new StringBuilder();
+                description
+                        .append(issue.isPullRequest() ? "Pull Request" : "Issue")
+                        .append("\n");
+                description.append("Название: ").append(issue.getTitle()).append("\n");
+                description
+                        .append("Пользователь: ")
+                        .append(issue.getUserLogin())
+                        .append("\n");
+                description
+                        .append("Время создания: ")
+                        .append(issue.getCreatedAt().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")))
+                        .append("\n");
+                var body = issue.getBody();
+                if (body == null) {
+                    throw new LinkException(String.format("Body of \"%s\" issue is null!", issue.getTitle()));
+                }
+                var maxPreviewLen = 200;
+                description
+                        .append("Превью: ")
+                        .append(body.substring(0, Math.min(maxPreviewLen, body.length())))
+                        .append(body.length() > maxPreviewLen ? "..." : "");
+                descriptions.add(description.toString());
+            }
+            return descriptions;
+        } catch (URISyntaxException e) {
+            throw new LinkException(e);
         }
-        return descriptions;
     }
 }

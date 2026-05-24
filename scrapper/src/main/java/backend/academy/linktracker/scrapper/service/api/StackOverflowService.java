@@ -3,8 +3,6 @@ package backend.academy.linktracker.scrapper.service.api;
 import backend.academy.linktracker.scrapper.client.StackOverflowClient;
 import backend.academy.linktracker.scrapper.model.Link;
 import backend.academy.linktracker.scrapper.properties.StackoverflowProperties;
-import java.net.URISyntaxException;
-import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -29,7 +27,7 @@ public class StackOverflowService implements ScrapingApiService {
     }
 
     @Override
-    public LocalDateTime getLastUpdate(Link link) throws URISyntaxException {
+    public LocalDateTime getLastUpdate(Link link) {
         var idPattern = Pattern.compile("https*:\\/\\/(?<site>[A-Za-z0-9]+)\\.com\\/questions\\/(?<id>\\d+)\\/.+");
         var matcher = idPattern.matcher(link.getUrl());
         if (matcher.find()) {
@@ -44,14 +42,14 @@ public class StackOverflowService implements ScrapingApiService {
                     .addKeyValue("quota_remaining", response.getQuotaRemaining())
                     .log();
             return LocalDateTime.ofInstant(
-                    Instant.ofEpochMilli(response.getItems().getFirst().getLastActivityDate()),
+                    Instant.ofEpochSecond(response.getItems().getFirst().getLastActivityDate()),
                     TimeZone.getDefault().toZoneId());
         }
         return null;
     }
 
     @Override
-    public List<String> getChangesDescriptions(Link link, OffsetDateTime since) throws URISyntaxException {
+    public List<String> getChangesDescriptions(Link link, OffsetDateTime since) {
         var idPattern = Pattern.compile("https*:\\/\\/(?<site>[A-Za-z0-9]+)\\.com\\/questions\\/(?<id>\\d+)\\/.+");
         var matcher = idPattern.matcher(link.getUrl());
         var descriptions = new ArrayList<String>();
@@ -67,7 +65,7 @@ public class StackOverflowService implements ScrapingApiService {
                     .getFirst()
                     .getTitle();
 
-            var timestamp = Timestamp.from(since.toInstant());
+            var timestamp = since.toEpochSecond();
             var params = properties.getParams();
             var answers = client.questionsAnswers(
                     questionId,
@@ -75,16 +73,16 @@ public class StackOverflowService implements ScrapingApiService {
                     site,
                     params.sort(),
                     params.order(),
-                    params.filter(),
+                    params.answersFilter(),
                     properties.getKey(),
                     properties.getAccessToken());
             var comments = client.questionsComments(
                     questionId,
                     timestamp,
                     site,
-                    "activity",
-                    "ask",
-                    "!nNPvSN_ZTx",
+                    params.sort(),
+                    params.order(),
+                    params.commentsFilter(),
                     properties.getKey(),
                     properties.getAccessToken());
 
@@ -98,7 +96,7 @@ public class StackOverflowService implements ScrapingApiService {
                 description
                         .append("Время создания: ")
                         .append(LocalDateTime.ofInstant(
-                                        Instant.ofEpochMilli(answer.getCreationDate()),
+                                        Instant.ofEpochSecond(answer.getCreationDate()),
                                         TimeZone.getDefault().toZoneId())
                                 .format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")))
                         .append("\n");
@@ -121,7 +119,7 @@ public class StackOverflowService implements ScrapingApiService {
                 description
                         .append("Время создания: ")
                         .append(LocalDateTime.ofInstant(
-                                        Instant.ofEpochMilli(comment.getCreationDate()),
+                                        Instant.ofEpochSecond(comment.getCreationDate()),
                                         TimeZone.getDefault().toZoneId())
                                 .format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")))
                         .append("\n");

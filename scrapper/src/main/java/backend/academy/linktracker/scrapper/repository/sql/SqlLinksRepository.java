@@ -65,7 +65,9 @@ public class SqlLinksRepository implements LinksRepository {
                 pageable.getOffset(),
                 pageable.getPageSize());
         var hasNext = jdbcTemplate.queryForObject(
-                "SELECT EXISTS(SELECT 1 FROM chats WHERE id > ? LIMIT 1)", Boolean.class, pageable.getOffset());
+                "SELECT EXISTS(SELECT 1 FROM links WHERE id > ? LIMIT 1)",
+                Boolean.class,
+                pageable.next().getOffset());
         for (var link : links) {
             link.setChats(getChats(link.getId()));
             link.setTags(getTags(link.getId()));

@@ -16,7 +16,7 @@ import org.springframework.validation.annotation.Validated;
 @EqualsAndHashCode
 @NoArgsConstructor
 public class StackoverflowProperties {
-    public record Params(String order, String sort, String filter) {}
+    public record Params(String order, String sort, String answersFilter, String commentsFilter) {}
 
     @NotEmpty
     private String baseUrl;

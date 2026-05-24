@@ -23,8 +23,8 @@ public interface GitHubClient {
             @NotNull @PathVariable String owner,
             @NotNull @PathVariable String repo,
             @NotNull @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime since,
-            @PathVariable String state,
-            @PathVariable String sort,
-            @PathVariable String direction,
-            @PathVariable("per_page") int perPage);
+            @RequestParam String state,
+            @RequestParam String sort,
+            @RequestParam String direction,
+            @RequestParam("per_page") int perPage);
 }

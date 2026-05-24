@@ -25,15 +25,16 @@ app:
     access-token: ${STACKOVERFLOW_ACCESS_TOKEN} # Use env variable. DO NOT KEEP TOKEN HERE
     params:
       sort: activity
-      order: ask
-      filter: "!nNPvSNdWme"
+      order: asc
+      answers-filter: "!nNPvSNdWme"
+      comments-filter: "!nNPvSN_ZTx"
   github:
     base-url: https://api.github.com
     token: ${GITHUB_TOKEN} # Use env variable. DO NOT KEEP TOKEN HERE
     params:
       state: all
       sort: updated
-      direction: ask
+      direction: asc
       per-page: 100
   scheduler:
     updates-delay: 10s
