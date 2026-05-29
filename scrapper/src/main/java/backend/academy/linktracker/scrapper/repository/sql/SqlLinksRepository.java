@@ -50,12 +50,12 @@ public class SqlLinksRepository implements LinksRepository {
     @Override
     public Slice<Link> findAll(Pageable pageable) {
         var links = jdbcTemplate.query(
-                "SELECT l.id, l.url, l.last_update, ls.chat_id, t.id as tag_id, t.name as tag_name FROM links l JOIN links_chats lc ON l.id = lc.link_id JOIN tags t ON l.id = t.id WHERE id > ? ORDER BY id ASC LIMIT ?",
+                "SELECT l.id, l.url, l.last_update, ls.chat_id, t.id as tag_id, t.name as tag_name FROM links l JOIN links_chats lc ON l.id = lc.link_id JOIN tags t ON l.id = t.id ORDER BY id ASC LIMIT ? OFFSET ?",
                 new LinksExtractor(),
-                pageable.getOffset(),
-                pageable.getPageSize());
+                pageable.getPageSize(),
+                pageable.getOffset());
         var hasNext = jdbcTemplate.queryForObject(
-                "SELECT EXISTS(SELECT 1 FROM links WHERE id > ? LIMIT 1)",
+                "SELECT EXISTS(SELECT 1 FROM links WHERE LIMIT 1 OFFSET ?)",
                 Boolean.class,
                 pageable.next().getOffset());
         return new SliceImpl<>(links, pageable, hasNext != null && hasNext);
