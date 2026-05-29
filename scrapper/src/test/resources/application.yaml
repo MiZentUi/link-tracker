@@ -41,3 +41,10 @@ app:
     links-per-page: 10
   repository:
     access-type: ORM
+  kafka:
+    enabled: false
+    topic:
+      link-update:
+        name: link-update
+        partitions-count: 5
+        replicas: 1
