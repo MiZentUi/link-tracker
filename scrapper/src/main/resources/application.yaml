@@ -19,7 +19,11 @@ spring:
     bootstrap-servers: ${KAFKA_NODES}
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
+      properties:
+        schema:
+          registry:
+            url: ${SCHEMA_REGISTRY_URL}
 
 app:
   bot:

@@ -1,7 +1,7 @@
 package backend.academy.linktracker.scrapper.service.sender;
 
-import backend.academy.linktracker.scrapper.dto.LinkUpdate;
+import backend.academy.linktracker.scrapper.model.Link;
 
 public interface MessageSender {
-    void sendLinkUpdate(LinkUpdate linkUpdate);
+    void sendLinkUpdate(Link link, String description);
 }

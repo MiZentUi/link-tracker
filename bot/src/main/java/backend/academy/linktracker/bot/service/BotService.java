@@ -5,6 +5,7 @@ import backend.academy.linktracker.bot.handler.CommandHandler;
 import backend.academy.linktracker.bot.model.Session;
 import backend.academy.linktracker.bot.repository.SessionRepository;
 import backend.academy.linktracker.bot.state.StateFactory;
+import backend.academy.linktracker.event.LinkUpdateEvent;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.BotCommand;
@@ -72,6 +73,16 @@ public class BotService {
     }
 
     public void sendLinkUpdate(LinkUpdate update) {
+        update.getTgChatIds().forEach(id -> {
+            var updateFormat = "<b>Обновление по ссылке: %s</b>%n<b>Описание:</b>%n<blockquote>%s</blockquote>";
+            var message = new SendMessage(
+                            (long) id, String.format(updateFormat, update.getUrl(), update.getDescription()))
+                    .parseMode(ParseMode.HTML);
+            bot.execute(message);
+        });
+    }
+
+    public void sendLinkUpdateEvent(LinkUpdateEvent update) {
         update.getTgChatIds().forEach(id -> {
             var updateFormat = "<b>Обновление по ссылке: %s</b>%n<b>Описание:</b>%n<blockquote>%s</blockquote>";
             var message = new SendMessage(
