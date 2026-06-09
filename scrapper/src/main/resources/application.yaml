@@ -54,6 +54,6 @@ app:
     topic:
       link-update:
         name: link-update
-        partitions-count: 5
-        replicas: 1
+        partitions-count: 3 # current number of consumers (1) multiplied by 3 for reserve
+        replicas: 3 # base value, cannot exceed the number of brokers (3)
   sender: kafka
