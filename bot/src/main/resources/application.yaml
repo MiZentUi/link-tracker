@@ -20,6 +20,11 @@ spring:
         schema:
           registry:
             url: ${SCHEMA_REGISTRY_URL}
+  data:
+    redis:
+      cluster:
+        nodes: ${REDIS_NODES:localhost:6379}
+        max-redirects: 3
 
 app:
   telegram:
@@ -33,3 +38,6 @@ app:
     topic:
       link-update:
         name: link-update
+  redis:
+    nodes: ${REDIS_NODES:localhost:6379}
+    ttl-duration: 60

@@ -1,9 +1,8 @@
 package backend.academy.linktracker.bot.handler;
 
-import backend.academy.linktracker.bot.client.ScrapperClient;
-import backend.academy.linktracker.bot.dto.RemoveLinkRequest;
 import backend.academy.linktracker.bot.exception.ApiErrorException;
 import backend.academy.linktracker.bot.model.Session;
+import backend.academy.linktracker.bot.service.LinksService;
 import backend.academy.linktracker.bot.state.SessionState;
 import backend.academy.linktracker.bot.state.StateFactory;
 import com.pengrad.telegrambot.model.Update;
@@ -17,7 +16,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class UntrackHandler implements CommandHandler {
     private final StateFactory stateFactory;
-    private final ScrapperClient scrapperClient;
+    private final LinksService linksService;
 
     @Override
     public String getCommand() {
@@ -42,9 +41,9 @@ public class UntrackHandler implements CommandHandler {
     public String handleLink(Update update) {
         long chatId = update.message().chat().id();
         var text = update.message().text();
-        var linkRequest = new RemoveLinkRequest(text);
+
         try {
-            scrapperClient.deleteLink(chatId, linkRequest);
+            linksService.untrack(chatId, text);
         } catch (ApiErrorException e) {
             var status = e.getStatusCode();
             return switch (status) {
@@ -53,7 +52,7 @@ public class UntrackHandler implements CommandHandler {
                 default -> e.getMessage();
             };
         }
-        log.atInfo().addKeyValue("link", linkRequest.getLink()).log("link removed");
+        log.atInfo().addKeyValue("link", text).log("link removed");
         return "Ссылка теперь не отслеживается";
     }
 }

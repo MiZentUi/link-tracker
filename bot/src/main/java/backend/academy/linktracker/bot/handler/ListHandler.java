@@ -1,8 +1,8 @@
 package backend.academy.linktracker.bot.handler;
 
-import backend.academy.linktracker.bot.client.ScrapperClient;
 import backend.academy.linktracker.bot.exception.ApiErrorException;
 import backend.academy.linktracker.bot.model.Session;
+import backend.academy.linktracker.bot.service.LinksService;
 import backend.academy.linktracker.bot.state.SessionState;
 import backend.academy.linktracker.bot.state.StateFactory;
 import com.pengrad.telegrambot.model.Update;
@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ListHandler implements CommandHandler {
     private final StateFactory stateFactory;
-    private final ScrapperClient scrapperClient;
+    private final LinksService linksService;
 
     @Override
     public String getCommand() {
@@ -39,8 +39,7 @@ public class ListHandler implements CommandHandler {
         if (update != null && update.message() != null) {
             long chatId = update.message().chat().id();
             try {
-                var links =
-                        scrapperClient.getLinks(update.message().chat().id()).getLinks();
+                var links = linksService.getLinks(update.message().chat().id());
                 log.atInfo()
                         .addKeyValue("chat_id", chatId)
                         .addKeyValue("links", links)
