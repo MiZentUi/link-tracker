@@ -1,11 +1,9 @@
 package backend.academy.linktracker.bot.properties;
 
 import java.util.List;
-
-import org.springframework.boot.context.properties.ConfigurationProperties;
-
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "app.redis")
 @Getter

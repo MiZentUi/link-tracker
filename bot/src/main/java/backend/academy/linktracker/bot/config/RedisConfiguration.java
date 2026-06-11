@@ -1,7 +1,8 @@
 package backend.academy.linktracker.bot.config;
 
+import backend.academy.linktracker.bot.properties.RedisCacheProperties;
 import java.time.Duration;
-
+import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,9 +13,6 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
-
-import backend.academy.linktracker.bot.properties.RedisCacheProperties;
-import lombok.RequiredArgsConstructor;
 
 @Configuration
 @EnableCaching
@@ -33,9 +31,11 @@ public class RedisConfiguration {
         var configuration = RedisCacheConfiguration.defaultCacheConfig()
                 .entryTtl(Duration.ofMinutes(properties.getTtlDuration()))
                 .disableCachingNullValues()
-                .serializeValuesWith(RedisSerializationContext.SerializationPair
-                        .fromSerializer(new GenericJackson2JsonRedisSerializer()));
+                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(
+                        new GenericJackson2JsonRedisSerializer()));
 
-        return RedisCacheManager.builder(connectionFactory).cacheDefaults(configuration).build();
+        return RedisCacheManager.builder(connectionFactory)
+                .cacheDefaults(configuration)
+                .build();
     }
 }
