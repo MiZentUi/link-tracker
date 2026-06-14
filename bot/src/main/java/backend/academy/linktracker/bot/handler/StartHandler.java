@@ -1,6 +1,5 @@
 package backend.academy.linktracker.bot.handler;
 
-import backend.academy.linktracker.bot.exception.ApiErrorException;
 import backend.academy.linktracker.bot.model.Session;
 import backend.academy.linktracker.bot.service.ChatsService;
 import backend.academy.linktracker.bot.state.SessionState;

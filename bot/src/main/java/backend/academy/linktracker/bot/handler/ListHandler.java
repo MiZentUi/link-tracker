@@ -1,6 +1,6 @@
 package backend.academy.linktracker.bot.handler;
 
-import backend.academy.linktracker.bot.exception.ApiErrorException;
+import backend.academy.linktracker.bot.exception.ApiClientErrorException;
 import backend.academy.linktracker.bot.model.Session;
 import backend.academy.linktracker.bot.service.LinksService;
 import backend.academy.linktracker.bot.state.SessionState;
@@ -68,7 +68,7 @@ public class ListHandler implements CommandHandler {
                     response.append("\n");
                 });
                 return response.toString();
-            } catch (ApiErrorException e) {
+            } catch (ApiClientErrorException e) {
                 var status = e.getStatusCode();
                 if (status == HttpStatus.NOT_FOUND) {
                     return "Чат не зарегестрирован. Введите /start для регистрации";

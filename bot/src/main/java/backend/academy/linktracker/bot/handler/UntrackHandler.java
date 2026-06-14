@@ -1,6 +1,6 @@
 package backend.academy.linktracker.bot.handler;
 
-import backend.academy.linktracker.bot.exception.ApiErrorException;
+import backend.academy.linktracker.bot.exception.ApiClientErrorException;
 import backend.academy.linktracker.bot.model.Session;
 import backend.academy.linktracker.bot.service.LinksService;
 import backend.academy.linktracker.bot.state.SessionState;
@@ -44,7 +44,7 @@ public class UntrackHandler implements CommandHandler {
 
         try {
             linksService.untrack(chatId, text);
-        } catch (ApiErrorException e) {
+        } catch (ApiClientErrorException e) {
             var status = e.getStatusCode();
             return switch (status) {
                 case HttpStatus.CONFLICT -> "Ссылка уже отслеживается";

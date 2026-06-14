@@ -32,11 +32,15 @@ resilience4j:
       default:
         timeout-duration: 3s
         cancel-running-future: true
-    instances:
-      links-service:
-        base-config: default
-      chats-service:
-        base-config: default
+  retry:
+    configs:
+      default:
+        maxAttempts: 3
+        waitDuration: 100ms
+        retryExceptions:
+          - org.springframework.web.client.HttpServerErrorException
+          - java.io.IOException
+          - backend.academy.linktracker.bot.exception.ApiServerErrorException
 
 app:
   telegram:
