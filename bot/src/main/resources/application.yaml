@@ -26,6 +26,18 @@ spring:
         nodes: ${REDIS_NODES:localhost:6379}
         max-redirects: 3
 
+resilience4j:
+  timelimiter:
+    configs:
+      default:
+        timeout-duration: 3s
+        cancel-running-future: true
+    instances:
+      links-service:
+        base-config: default
+      chats-service:
+        base-config: default
+
 app:
   telegram:
     url: https://api.telegram.org/bot

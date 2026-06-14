@@ -14,6 +14,9 @@ import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.request.SetMyCommands;
 import jakarta.annotation.PostConstruct;
 import java.util.Map;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.TimeoutException;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -46,7 +49,18 @@ public class BotService {
                     sessionRepository.save(session);
                 }
 
-                var message = session.handleUpdate(update);
+                var message = "";
+
+                try {
+                    message = session.handleUpdate(update);
+                } catch (CompletionException e) {
+                    log.error(e.getMessage());
+                    if (e.getCause() instanceof TimeoutException) {
+                        message = "Timeout error!";
+                    } else {
+                        throw e;
+                    }
+                }
 
                 if (message != null) {
                     var response = bot.execute(new SendMessage(chatId, message));
@@ -76,7 +90,7 @@ public class BotService {
         update.getTgChatIds().forEach(id -> {
             var updateFormat = "<b>Обновление по ссылке: %s</b>%n<b>Описание:</b>%n<blockquote>%s</blockquote>";
             var message = new SendMessage(
-                            (long) id, String.format(updateFormat, update.getUrl(), update.getDescription()))
+                    (long) id, String.format(updateFormat, update.getUrl(), update.getDescription()))
                     .parseMode(ParseMode.HTML);
             bot.execute(message);
         });
@@ -86,7 +100,7 @@ public class BotService {
         update.getTgChatIds().forEach(id -> {
             var updateFormat = "<b>Обновление по ссылке: %s</b>%n<b>Описание:</b>%n<blockquote>%s</blockquote>";
             var message = new SendMessage(
-                            (long) id, String.format(updateFormat, update.getUrl(), update.getDescription()))
+                    (long) id, String.format(updateFormat, update.getUrl(), update.getDescription()))
                     .parseMode(ParseMode.HTML);
             bot.execute(message);
         });

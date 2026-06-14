@@ -39,7 +39,7 @@ public class ListHandler implements CommandHandler {
         if (update != null && update.message() != null) {
             long chatId = update.message().chat().id();
             try {
-                var links = linksService.getLinks(update.message().chat().id());
+                var links = linksService.getLinks(update.message().chat().id()).join();
                 log.atInfo()
                         .addKeyValue("chat_id", chatId)
                         .addKeyValue("links", links)
