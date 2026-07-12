@@ -1,0 +1,202 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    ports:
+      - 5432:5432
+    env_file:
+      .env
+    environment:
+      POSTGRES_DB: scrapper
+    restart: unless-stopped
+    volumes:
+      - db-data:/var/lib/postgresql
+    healthcheck:
+      test: "pg_isready -U $$POSTGRES_USER -d scrapper"
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  scrapper:
+    build:
+      context: scrapper
+      dockerfile: Dockerfile
+    container_name: scrapper
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka-0:
+        condition: service_started
+      kafka-1:
+        condition: service_started
+      kafka-2:
+        condition: service_started
+    env_file:
+      - .env
+    environment:
+      POSTGRES_URL: postgres:5432
+      BOT_URL: http://bot:8080
+      KAFKA_NODES: kafka-0:9092,kafka-1:9092,kafka-2:9092
+      SCHEMA_REGISTRY_URL: http://schema-registry:8081
+    healthcheck:
+      test: "curl -f http://localhost:8081/actuator/health"
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+  bot:
+    build:
+      context: bot
+      dockerfile: Dockerfile
+    container_name: bot
+    env_file:
+      - .env
+    depends_on:
+      kafka-0:
+        condition: service_started
+      kafka-1:
+        condition: service_started
+      kafka-2:
+        condition: service_started
+      valkey-0:
+        condition: service_started
+      valkey-1:
+        condition: service_started
+      valkey-2:
+        condition: service_started
+      scrapper:
+        condition: service_healthy
+    environment:
+      SCRAPPER_URL: http://scrapper:8081
+      KAFKA_NODES: kafka-0:9092,kafka-1:9092,kafka-2:9092
+      REDIS_NODES: valkey-0:6379,valkey-1:6379,valkey-2:6379
+      SCHEMA_REGISTRY_URL: http://schema-registry:8081
+    healthcheck:
+      test: "curl -f http://localhost:8080/actuator/health"
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+  liquibase-migrations:
+    container_name: migrations
+    image: liquibase/liquibase:4.33
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      .env
+    environment:
+      POSTGRES_DB: scrapper
+    command:
+      - --searchPath=/changesets
+      - --changelog-file=master.yaml
+      - --driver=org.postgresql.Driver
+      - --url=jdbc:postgresql://postgres:5432/scrapper
+      - --username=${POSTGRES_USER}
+      - --password=${POSTGRES_PASSWORD}
+      - update
+    volumes:
+      - ./migrations:/changesets
+
+  kafka-0:
+    image: apache/kafka:4.3.0
+    container_name: kafka-0
+    environment:
+      KAFKA_NODE_ID: 0
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: INTERNAL://:9091,EXTERNAL://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka-0:9091,EXTERNAL://kafka-0:9092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 0@kafka-0:9093,1@kafka-1:9093,2@kafka-2:9093
+
+  kafka-1:
+    image: apache/kafka:4.3.0
+    container_name: kafka-1
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: INTERNAL://:9091,EXTERNAL://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka-1:9091,EXTERNAL://kafka-1:9092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 0@kafka-0:9093,1@kafka-1:9093,2@kafka-2:9093
+
+  kafka-2:
+    image: apache/kafka:4.3.0
+    container_name: kafka-2
+    environment:
+      KAFKA_NODE_ID: 2
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: INTERNAL://:9091,EXTERNAL://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka-2:9091,EXTERNAL://kafka-2:9092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 0@kafka-0:9093,1@kafka-1:9093,2@kafka-2:9093
+
+  schema-registry:
+    image: confluentinc/cp-schema-registry:latest
+    hostname: schema-registry
+    depends_on:
+      - kafka-0
+      - kafka-1
+      - kafka-2
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_LISTENERS: http://schema-registry:8081
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: kafka-0:9092,kafka-1:9092,kafka-2:9092
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:v0.7.2
+    container_name: kafka-ui
+    hostname: kafka-ui
+    depends_on:
+      - kafka-0
+      - kafka-1
+      - kafka-2
+    ports:
+      - 8082:8080
+    environment:
+      KAFKA_CLUSTERS_0_NAME: kafka
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka-0:9091,kafka-1:9091,kafka-2:9091
+      DYNAMIC_CONFIG_ENABLED: true
+
+  valkey-0:
+    image: valkey/valkey:9.1
+    volumes:
+      - valkey-data-0:/data
+    command: valkey-server --cluster-enabled yes --cluster-config-file nodes.conf --cluster-node-timeout 5000 --appendonly yes
+
+  valkey-1:
+    image: valkey/valkey:9.1
+    volumes:
+      - valkey-data-1:/data
+    command: valkey-server --cluster-enabled yes --cluster-config-file nodes.conf --cluster-node-timeout 5000 --appendonly yes
+
+  valkey-2:
+    image: valkey/valkey:9.1
+    volumes:
+      - valkey-data-2:/data
+    command: valkey-server --cluster-enabled yes --cluster-config-file nodes.conf --cluster-node-timeout 5000 --appendonly yes
+
+  valkey-cluster:
+    image: valkey/valkey:9.1
+    depends_on:
+      - valkey-0
+      - valkey-1
+      - valkey-2
+    command: valkey-cli --cluster create valkey-0:6379 valkey-1:6379 valkey-2:6379 --cluster-replicas 0 --cluster-yes
+    tty: true
+    restart: no
+
+
+volumes:
+  db-data:
+  valkey-data-0:
+  valkey-data-1:
+  valkey-data-2:

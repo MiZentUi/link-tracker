@@ -1,0 +1,50 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: scrapper
+  config:
+    import: optional:file:.env[.properties]
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_URL:localhost:5432}/scrapper
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  liquibase:
+    change-log: file:../migrations/master.yaml
+
+app:
+  bot:
+    base-url: ${BOT_URL:http://localhost:8080}
+  stackoverflow:
+    base-url: ${wiremock.server.baseUrl}
+    key: ${STACKOVERFLOW_KEY} # Use env variable. DO NOT KEEP TOKEN HERE
+    access-token: ${STACKOVERFLOW_ACCESS_TOKEN} # Use env variable. DO NOT KEEP TOKEN HERE
+    params:
+      sort: activity
+      order: asc
+      answers-filter: "!nNPvSNdWme"
+      comments-filter: "!nNPvSN_ZTx"
+  github:
+    base-url: ${wiremock.server.baseUrl}
+    token: ${GITHUB_TOKEN} # Use env variable. DO NOT KEEP TOKEN HERE
+    params:
+      state: all
+      sort: updated
+      direction: asc
+      per-page: 100
+  scheduler:
+    updates-delay: 10s
+    links-per-page: 10
+  repository:
+    access-type: ORM
+  kafka:
+    enabled: false
+    topic:
+      link-update:
+        name: link-update
+        partitions-count: 5
+        replicas: 1

@@ -1,13 +1,17 @@
 package backend.academy.linktracker.scrapper.service;
 
-import backend.academy.linktracker.scrapper.client.BotClient;
-import backend.academy.linktracker.scrapper.dto.LinkUpdate;
+import backend.academy.linktracker.scrapper.model.Link;
+import backend.academy.linktracker.scrapper.properties.SchedulerProperties;
 import backend.academy.linktracker.scrapper.repository.LinksRepository;
 import backend.academy.linktracker.scrapper.service.api.ScrapingApiService;
+import backend.academy.linktracker.scrapper.service.sender.MessageSender;
+import jakarta.transaction.Transactional;
+import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -15,14 +19,26 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class ScheduleService {
+    private final SchedulerProperties properties;
+
     private final LinksRepository linksRepository;
 
-    private final BotClient botClient;
+    private final MessageSender sender;
     private final List<ScrapingApiService> apiServices;
 
-    @Scheduled(fixedDelayString = "${app.updates.fixed-delay.in.seconds}", timeUnit = TimeUnit.SECONDS)
+    @Transactional
+    @Scheduled(fixedDelayString = "#{@schedulerProperties.updatesDelay}")
     public void checkUpdates() {
-        var links = linksRepository.findAll();
+        var pageable = PageRequest.of(0, properties.getLinksPerPage());
+        Slice<Link> links;
+        do {
+            links = linksRepository.findAll(pageable);
+            updateSlice(links);
+            pageable = pageable.next();
+        } while (links.hasNext());
+    }
+
+    private void updateSlice(Slice<Link> links) {
         for (var link : links) {
             var url = link.getUrl();
             var apiService = apiServices.stream()
@@ -31,22 +47,27 @@ public class ScheduleService {
                     .orElse(null);
 
             if (apiService == null) {
-                log.atWarn().addKeyValue("link", url).log("api service not exists");
+                log.atWarn().addKeyValue("url", url).log("api service not exists for link");
                 continue;
             }
 
-            log.atInfo().addKeyValue("link", link).log("check link");
+            log.atInfo().addKeyValue("url", url).log("check link");
 
-            var updatedAt = apiService.getLastUpdate(link);
-
-            if (updatedAt != null && updatedAt.isAfter(link.getLastUpdate())) {
-                botClient.update(LinkUpdate.builder()
-                        .id(link.getId())
-                        .url(link.getUrl())
-                        .description("Что-то изменилось!")
-                        .tgChatIds(link.getChatIds())
-                        .build());
-                link.setLastUpdate(updatedAt);
+            try {
+                var lastUpdate = link.getLastUpdate();
+                var descriptions = apiService.getChangesDescriptions(link, lastUpdate);
+                for (var description : descriptions) {
+                    sender.sendLinkUpdate(link, description);
+                }
+                if (!descriptions.isEmpty()) {
+                    link.setLastUpdate(OffsetDateTime.now());
+                    linksRepository.save(link);
+                }
+            } catch (Exception e) {
+                log.atError().addKeyValue("exception", e.getMessage()).log();
+                sender.sendLinkUpdate(link, "Ошибка обработки!");
+                link.setLastUpdate(OffsetDateTime.now());
+                linksRepository.save(link);
             }
         }
     }

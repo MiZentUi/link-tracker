@@ -7,7 +7,6 @@ import backend.academy.linktracker.scrapper.dto.RemoveLinkRequest;
 import backend.academy.linktracker.scrapper.service.LinksService;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
-import java.util.ArrayList;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,14 +30,12 @@ public class LinksController {
     @PostMapping
     public LinkResponse addLink(
             @NotNull @PositiveOrZero @RequestHeader("Tg-Chat-Id") Long chatId, @RequestBody AddLinkRequest request) {
-        var link = linksService.addLink(request.getLink(), request.getTags(), chatId);
-        return new LinkResponse(link.getId(), link.getUrl(), new ArrayList<>(link.getTags()));
+        return linksService.addLink(request.getLink(), request.getTags(), chatId);
     }
 
     @DeleteMapping
     public LinkResponse removeLink(
             @NotNull @PositiveOrZero @RequestHeader("Tg-Chat-Id") Long chatId, @RequestBody RemoveLinkRequest request) {
-        var link = linksService.removeLink(request.getLink(), chatId);
-        return new LinkResponse(link.getId(), link.getUrl(), new ArrayList<>(link.getTags()));
+        return linksService.removeLink(request.getLink(), chatId);
     }
 }

@@ -1,6 +1,7 @@
 package backend.academy.linktracker.scrapper.properties;
 
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,6 +16,7 @@ import org.springframework.validation.annotation.Validated;
 @EqualsAndHashCode
 @NoArgsConstructor
 public class StackoverflowProperties {
+    public record Params(String order, String sort, String answersFilter, String commentsFilter) {}
 
     @NotEmpty
     private String baseUrl;
@@ -24,4 +26,7 @@ public class StackoverflowProperties {
 
     @NotEmpty
     private String accessToken;
+
+    @NotNull
+    private Params params;
 }
