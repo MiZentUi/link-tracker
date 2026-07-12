@@ -1,32 +1,24 @@
 package backend.academy.linktracker.scrapper.properties;
 
 import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 
-@ConfigurationProperties(prefix = "app.stackoverflow")
+@ConfigurationProperties(prefix = "app.scheduler")
+@Component
 @Validated
 @Getter
 @Setter
 @EqualsAndHashCode
 @NoArgsConstructor
-public class StackoverflowProperties {
-    public record Params(String order, String sort, String answersFilter, String commentsFilter) {}
+public class SchedulerProperties {
+    private int linksPerPage;
 
     @NotEmpty
-    private String baseUrl;
-
-    @NotEmpty
-    private String key;
-
-    @NotEmpty
-    private String accessToken;
-
-    @NotNull
-    private Params params;
+    private String updatesDelay;
 }

@@ -20,15 +20,31 @@ app:
   bot:
     base-url: ${BOT_URL:http://localhost:8080}
   stackoverflow:
-    base-url: https://api.stackexchange.com/2.1
+    base-url: ${wiremock.server.baseUrl}
     key: ${STACKOVERFLOW_KEY} # Use env variable. DO NOT KEEP TOKEN HERE
     access-token: ${STACKOVERFLOW_ACCESS_TOKEN} # Use env variable. DO NOT KEEP TOKEN HERE
+    params:
+      sort: activity
+      order: asc
+      answers-filter: "!nNPvSNdWme"
+      comments-filter: "!nNPvSN_ZTx"
   github:
-    base-url: https://api.github.com
+    base-url: ${wiremock.server.baseUrl}
     token: ${GITHUB_TOKEN} # Use env variable. DO NOT KEEP TOKEN HERE
-  updates:
-    fixed-delay:
-      in:
-        seconds: 10
+    params:
+      state: all
+      sort: updated
+      direction: asc
+      per-page: 100
+  scheduler:
+    updates-delay: 10s
+    links-per-page: 10
   repository:
     access-type: ORM
+  kafka:
+    enabled: false
+    topic:
+      link-update:
+        name: link-update
+        partitions-count: 5
+        replicas: 1

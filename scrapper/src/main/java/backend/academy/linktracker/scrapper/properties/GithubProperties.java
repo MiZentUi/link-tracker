@@ -1,6 +1,7 @@
 package backend.academy.linktracker.scrapper.properties;
 
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,10 +16,14 @@ import org.springframework.validation.annotation.Validated;
 @EqualsAndHashCode
 @NoArgsConstructor
 public class GithubProperties {
+    public record Params(String state, String sort, String direction, int perPage) {}
 
     @NotEmpty
     private String baseUrl;
 
     @NotEmpty
     private String token;
+
+    @NotNull
+    private Params params;
 }

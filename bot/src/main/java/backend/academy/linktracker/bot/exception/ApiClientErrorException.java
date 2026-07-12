@@ -5,11 +5,11 @@ import lombok.Getter;
 import org.springframework.http.HttpStatusCode;
 
 @Getter
-public class ApiErrorException extends RuntimeException {
+public class ApiClientErrorException extends RuntimeException {
     private final ApiErrorResponse response;
     private final HttpStatusCode statusCode;
 
-    public ApiErrorException(ApiErrorResponse response, HttpStatusCode statusCode) {
+    public ApiClientErrorException(ApiErrorResponse response, HttpStatusCode statusCode) {
         this.statusCode = statusCode;
         this.response = response;
         super(response.getExceptionMessage());
