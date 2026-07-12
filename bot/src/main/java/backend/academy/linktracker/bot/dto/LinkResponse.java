@@ -5,13 +5,17 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.validator.constraints.URL;
 
 @Getter
 @Setter
+@Builder
 @AllArgsConstructor
+@EqualsAndHashCode
 public class LinkResponse {
 
     @NotNull(message = "ID mustn't be null")

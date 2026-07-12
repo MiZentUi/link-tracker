@@ -2,7 +2,8 @@ package backend.academy.linktracker.bot.config;
 
 import backend.academy.linktracker.bot.client.ScrapperClient;
 import backend.academy.linktracker.bot.dto.ApiErrorResponse;
-import backend.academy.linktracker.bot.exception.ApiErrorException;
+import backend.academy.linktracker.bot.exception.ApiClientErrorException;
+import backend.academy.linktracker.bot.exception.ApiServerErrorException;
 import backend.academy.linktracker.bot.properties.ScrapperProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,14 +25,23 @@ public class ScrapperConfiguration {
     ScrapperClient scrapperClient(RestClient.Builder restClientBuilder) {
         var client = restClientBuilder
                 .baseUrl(properties.getBaseUrl())
-                .defaultStatusHandler(HttpStatusCode::isError, (_, response) -> {
+                .defaultStatusHandler(HttpStatusCode::is4xxClientError, (_, response) -> {
                     var apiResponse = new ObjectMapper().readValue(response.getBody(), ApiErrorResponse.class);
                     log.atInfo()
                             .addKeyValue("code", apiResponse.getCode())
                             .addKeyValue("description", apiResponse.getDescription())
                             .addKeyValue("exception_message", apiResponse.getExceptionMessage())
                             .log("ApiErrorResponse");
-                    throw new ApiErrorException(apiResponse, response.getStatusCode());
+                    throw new ApiClientErrorException(apiResponse, response.getStatusCode());
+                })
+                .defaultStatusHandler(HttpStatusCode::is5xxServerError, (_, response) -> {
+                    var apiResponse = new ObjectMapper().readValue(response.getBody(), ApiErrorResponse.class);
+                    log.atInfo()
+                            .addKeyValue("code", apiResponse.getCode())
+                            .addKeyValue("description", apiResponse.getDescription())
+                            .addKeyValue("exception_message", apiResponse.getExceptionMessage())
+                            .log("ApiErrorResponse");
+                    throw new ApiServerErrorException(apiResponse, response.getStatusCode());
                 })
                 .build();
         return HttpServiceProxyFactory.builderFor(RestClientAdapter.create(client))

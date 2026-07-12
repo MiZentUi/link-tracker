@@ -20,6 +20,27 @@ spring:
         schema:
           registry:
             url: ${SCHEMA_REGISTRY_URL}
+  data:
+    redis:
+      cluster:
+        nodes: ${REDIS_NODES:localhost:6379}
+        max-redirects: 3
+
+resilience4j:
+  timelimiter:
+    configs:
+      default:
+        timeout-duration: 3s
+        cancel-running-future: true
+  retry:
+    configs:
+      default:
+        maxAttempts: 3
+        waitDuration: 100ms
+        retryExceptions:
+          - org.springframework.web.client.HttpServerErrorException
+          - java.io.IOException
+          - backend.academy.linktracker.bot.exception.ApiServerErrorException
 
 app:
   telegram:
@@ -33,3 +54,6 @@ app:
     topic:
       link-update:
         name: link-update
+  redis:
+    nodes: ${REDIS_NODES:localhost:6379}
+    ttl-duration: 60

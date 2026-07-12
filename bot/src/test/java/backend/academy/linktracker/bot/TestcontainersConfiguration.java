@@ -18,9 +18,8 @@ class TestcontainersConfiguration {
         return new PostgreSQLContainer(DockerImageName.parse("postgres:18-alpine"));
     }
 
-    // Uncomment to start RedisContainer
-    // @Bean
-    // @ServiceConnection
+    @Bean
+    @ServiceConnection
     RedisContainer redisContainer() {
         return new RedisContainer(DockerImageName.parse("redis:8.2-alpine"));
     }

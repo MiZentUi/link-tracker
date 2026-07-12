@@ -25,8 +25,6 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      bot:
-        condition: service_healthy
       kafka-0:
         condition: service_started
       kafka-1:
@@ -61,9 +59,18 @@ services:
         condition: service_started
       kafka-2:
         condition: service_started
+      valkey-0:
+        condition: service_started
+      valkey-1:
+        condition: service_started
+      valkey-2:
+        condition: service_started
+      scrapper:
+        condition: service_healthy
     environment:
       SCRAPPER_URL: http://scrapper:8081
       KAFKA_NODES: kafka-0:9092,kafka-1:9092,kafka-2:9092
+      REDIS_NODES: valkey-0:6379,valkey-1:6379,valkey-2:6379
       SCHEMA_REGISTRY_URL: http://schema-registry:8081
     healthcheck:
       test: "curl -f http://localhost:8080/actuator/health"
@@ -159,5 +166,37 @@ services:
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka-0:9091,kafka-1:9091,kafka-2:9091
       DYNAMIC_CONFIG_ENABLED: true
 
+  valkey-0:
+    image: valkey/valkey:9.1
+    volumes:
+      - valkey-data-0:/data
+    command: valkey-server --cluster-enabled yes --cluster-config-file nodes.conf --cluster-node-timeout 5000 --appendonly yes
+
+  valkey-1:
+    image: valkey/valkey:9.1
+    volumes:
+      - valkey-data-1:/data
+    command: valkey-server --cluster-enabled yes --cluster-config-file nodes.conf --cluster-node-timeout 5000 --appendonly yes
+
+  valkey-2:
+    image: valkey/valkey:9.1
+    volumes:
+      - valkey-data-2:/data
+    command: valkey-server --cluster-enabled yes --cluster-config-file nodes.conf --cluster-node-timeout 5000 --appendonly yes
+
+  valkey-cluster:
+    image: valkey/valkey:9.1
+    depends_on:
+      - valkey-0
+      - valkey-1
+      - valkey-2
+    command: valkey-cli --cluster create valkey-0:6379 valkey-1:6379 valkey-2:6379 --cluster-replicas 0 --cluster-yes
+    tty: true
+    restart: no
+
+
 volumes:
   db-data:
+  valkey-data-0:
+  valkey-data-1:
+  valkey-data-2:
