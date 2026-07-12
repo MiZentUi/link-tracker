@@ -1,15 +1,17 @@
-package backend.academy.linktracker.bot.configuration;
+package backend.academy.linktracker.bot.config;
 
 import backend.academy.linktracker.bot.properties.TelegramProperties;
 import com.pengrad.telegrambot.TelegramBot;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+@Slf4j
 @Configuration
 public class TelegramConfiguration {
 
     @Bean
-    public TelegramBot telegramBot(TelegramProperties properties) {
+    TelegramBot telegramBot(TelegramProperties properties) {
         var builder = new TelegramBot.Builder(properties.getToken())
                 .apiUrl(properties.getUrl())
                 .updateListenerSleep(properties.getUpdateListenerSleep().toMillis());
