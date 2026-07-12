@@ -15,6 +15,15 @@ spring:
       ddl-auto: validate
   liquibase:
     enabled: false
+  kafka:
+    bootstrap-servers: ${KAFKA_NODES}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
+      properties:
+        schema:
+          registry:
+            url: ${SCHEMA_REGISTRY_URL}
 
 app:
   bot:
@@ -41,3 +50,10 @@ app:
     links-per-page: 10
   repository:
     access-type: ORM
+  kafka:
+    topic:
+      link-update:
+        name: link-update
+        partitions-count: 3 # current number of consumers (1) multiplied by 3 for reserve
+        replicas: 3 # base value, cannot exceed the number of brokers (3)
+  sender: kafka

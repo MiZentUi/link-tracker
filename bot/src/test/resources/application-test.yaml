@@ -4,3 +4,17 @@ app:
     token: test-token
     update-listener-sleep: 1s
     debug: true
+  scrapper:
+    base-url: ${wiremock.server.baseUrl}/scrapper
+
+resilience4j:
+  timelimiter:
+    configs:
+      default:
+        timeout-duration: 100ms
+        cancel-running-future: true
+    instances:
+      links-service:
+        base-config: default
+      chats-service:
+        base-config: default

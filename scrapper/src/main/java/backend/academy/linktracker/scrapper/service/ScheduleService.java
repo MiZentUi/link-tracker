@@ -1,7 +1,5 @@
 package backend.academy.linktracker.scrapper.service;
 
-import backend.academy.linktracker.scrapper.dto.LinkUpdate;
-import backend.academy.linktracker.scrapper.model.Chat;
 import backend.academy.linktracker.scrapper.model.Link;
 import backend.academy.linktracker.scrapper.properties.SchedulerProperties;
 import backend.academy.linktracker.scrapper.repository.LinksRepository;
@@ -59,12 +57,7 @@ public class ScheduleService {
                 var lastUpdate = link.getLastUpdate();
                 var descriptions = apiService.getChangesDescriptions(link, lastUpdate);
                 for (var description : descriptions) {
-                    sender.sendLinkUpdate(LinkUpdate.builder()
-                            .id(link.getId())
-                            .url(link.getUrl())
-                            .description(description)
-                            .tgChatIds(link.getChats().stream().map(Chat::getId).toList())
-                            .build());
+                    sender.sendLinkUpdate(link, description);
                 }
                 if (!descriptions.isEmpty()) {
                     link.setLastUpdate(OffsetDateTime.now());
@@ -72,12 +65,7 @@ public class ScheduleService {
                 }
             } catch (Exception e) {
                 log.atError().addKeyValue("exception", e.getMessage()).log();
-                sender.sendLinkUpdate(LinkUpdate.builder()
-                        .id(link.getId())
-                        .url(link.getUrl())
-                        .description("Ошибка обработки!")
-                        .tgChatIds(link.getChats().stream().map(Chat::getId).toList())
-                        .build());
+                sender.sendLinkUpdate(link, "Ошибка обработки!");
                 link.setLastUpdate(OffsetDateTime.now());
                 linksRepository.save(link);
             }

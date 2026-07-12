@@ -1,9 +1,9 @@
 package backend.academy.linktracker.bot.handler;
 
-import backend.academy.linktracker.bot.client.ScrapperClient;
 import backend.academy.linktracker.bot.dto.AddLinkRequest;
-import backend.academy.linktracker.bot.exception.ApiErrorException;
+import backend.academy.linktracker.bot.exception.ApiClientErrorException;
 import backend.academy.linktracker.bot.model.Session;
+import backend.academy.linktracker.bot.service.LinksService;
 import backend.academy.linktracker.bot.state.SessionState;
 import backend.academy.linktracker.bot.state.StateFactory;
 import com.pengrad.telegrambot.model.Update;
@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class TrackHandler implements CommandHandler {
     private final StateFactory stateFactory;
-    private final ScrapperClient scrapperClient;
+    private final LinksService linksService;
 
     @Override
     public String getCommand() {
@@ -60,8 +60,8 @@ public class TrackHandler implements CommandHandler {
                 .log();
         linkRequest.setTags(tags);
         try {
-            scrapperClient.createLink(chatId, linkRequest);
-        } catch (ApiErrorException e) {
+            linksService.track(chatId, linkRequest);
+        } catch (ApiClientErrorException e) {
             var status = e.getStatusCode();
             return switch (status) {
                 case HttpStatus.CONFLICT -> "Ссылка уже отслеживается";

@@ -66,7 +66,8 @@ public class GitHubService implements ScrapingApiService {
                         .append("\n");
                 var body = issue.getBody();
                 if (body == null) {
-                    throw new LinkException(String.format("Body of \"%s\" issue is null!", issue.getTitle()));
+                    log.atInfo().addKeyValue("title", issue.getTitle()).log("body is null");
+                    body = "";
                 }
                 var maxPreviewLen = 200;
                 description
