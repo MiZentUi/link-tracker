@@ -16,7 +16,6 @@ import jakarta.annotation.PostConstruct;
 import java.util.Map;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.TimeoutException;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -26,6 +25,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class BotService {
+
     private final StateFactory stateFactory;
     private final TelegramBot bot;
     private final SessionRepository sessionRepository;
@@ -54,7 +54,7 @@ public class BotService {
                 try {
                     message = session.handleUpdate(update);
                 } catch (CompletionException e) {
-                    log.error(e.getMessage());
+                    log.error("message: {}", e.getMessage());
                     if (e.getCause() instanceof TimeoutException) {
                         message = "Timeout error!";
                     } else {
@@ -90,7 +90,7 @@ public class BotService {
         update.getTgChatIds().forEach(id -> {
             var updateFormat = "<b>Обновление по ссылке: %s</b>%n<b>Описание:</b>%n<blockquote>%s</blockquote>";
             var message = new SendMessage(
-                    (long) id, String.format(updateFormat, update.getUrl(), update.getDescription()))
+                            (long) id, String.format(updateFormat, update.getUrl(), update.getDescription()))
                     .parseMode(ParseMode.HTML);
             bot.execute(message);
         });
@@ -100,7 +100,7 @@ public class BotService {
         update.getTgChatIds().forEach(id -> {
             var updateFormat = "<b>Обновление по ссылке: %s</b>%n<b>Описание:</b>%n<blockquote>%s</blockquote>";
             var message = new SendMessage(
-                    (long) id, String.format(updateFormat, update.getUrl(), update.getDescription()))
+                            (long) id, String.format(updateFormat, update.getUrl(), update.getDescription()))
                     .parseMode(ParseMode.HTML);
             bot.execute(message);
         });

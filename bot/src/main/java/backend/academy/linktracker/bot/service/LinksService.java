@@ -6,10 +6,8 @@ import backend.academy.linktracker.bot.dto.LinkResponse;
 import backend.academy.linktracker.bot.dto.RemoveLinkRequest;
 import io.github.resilience4j.retry.annotation.Retry;
 import io.github.resilience4j.timelimiter.annotation.TimeLimiter;
-
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -24,7 +22,8 @@ public class LinksService {
     @TimeLimiter(name = "links-service")
     @Retry(name = "links-service")
     public CompletableFuture<List<LinkResponse>> getLinks(Long chatId) {
-        return CompletableFuture.supplyAsync(() -> scrapperClient.getLinks(chatId).getLinks());
+        return CompletableFuture.supplyAsync(
+                () -> scrapperClient.getLinks(chatId).getLinks());
     }
 
     @CacheEvict(value = "links", key = "#chatId")
